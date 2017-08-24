@@ -240,7 +240,7 @@ if platform.system() == 'Windows':
 else:
     PHANTOMJS_PATH = './phantomjs-2.1.1-windows/bin/phantomjs.exe'  
   
-leagues = ['spanish-la-liga-season-', 'english-premier-league', 'italian-serie-a', 'german-bundesliga', 'french-ligue-1', 'dutch-eredivisie', 'russian-premier-league', 'us-major-league-soccer','brazilian-serie-a', 'mexican-liga-mx', 'mexican-primera-apertura', 'english-football-league-championship', 'australian-a-league', 'turkish-super-lig', 'portuguese-primeira-liga']
+leagues = ['spanish-la-liga', 'english-premier-league', 'italian-serie-a', 'german-bundesliga', 'french-ligue-1', 'dutch-eredivisie', 'russian-premier-league', 'us-major-league-soccer','brazilian-serie-a', 'mexican-liga-mx', 'mexican-primera-apertura', 'english-football-league-championship', 'australian-a-league', 'turkish-super-lig', 'portuguese-primeira-liga']
 league_team_list = ['Spanish La Liga', 'English Barclays Premier League']
 
 # league_num is the league
