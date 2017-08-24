@@ -240,8 +240,15 @@ if platform.system() == 'Windows':
 else:
     PHANTOMJS_PATH = './phantomjs-2.1.1-windows/bin/phantomjs.exe'  
   
-  
-url = 'http://www.squawka.com/football-stats/spanish-la-liga-season-'
+leagues = ['spanish-la-liga-season-', 'english-premier-league', 'italian-serie-a', 'german-bundesliga', 'french-ligue-1', 'dutch-eredivisie', 'russian-premier-league', 'us-major-league-soccer','brazilian-serie-a', 'mexican-liga-mx', 'mexican-primera-apertura', 'english-football-league-championship', 'australian-a-league', 'turkish-super-lig', 'portuguese-primeira-liga']
+league_team_list = ['Spanish La Liga', 'English Barclays Premier League']
+
+# league_num is the league
+league_num = 0
+league_text = league_team_list[league_num]
+url = 'http://www.squawka.com/football-stats/'+leagues[league_num]+'-season-'
+
+
 years = ['2012-2013', '2013-2014','2014-2015','2015-2016','2016-2017']
 values_num = ['4', '69','136', '176', '712']
 hdr = {'User-Agent': 'Mozilla/5.0'}
@@ -366,7 +373,7 @@ for num_season in range(len(years)):
                     try:
                         select = Select(browser.find_element_by_id('club_id')).select_by_visible_text(team_name)
                         element = WebDriverWait(browser, delay2).until(EC.presence_of_element_located((By.ID, "statistics-options")))
-                        select = Select(browser.find_element_by_id('competition')).select_by_visible_text('Spanish La Liga')
+                        select = Select(browser.find_element_by_id('competition')).select_by_visible_text(league_text)
                         season_name = 'Season ' + season.replace('-','/')
                         browser.implicitly_wait(delay0)
                         time.sleep(delay0)   
@@ -824,7 +831,7 @@ for num_season in range(len(years)):
                     try:
                         select = Select(browser.find_element_by_id('club_id')).select_by_visible_text(team_name)
                         element = WebDriverWait(browser, delay2).until(EC.presence_of_element_located((By.ID, "statistics-options")))
-                        select = Select(browser.find_element_by_id('competition')).select_by_visible_text('Spanish La Liga')
+                        select = Select(browser.find_element_by_id('competition')).select_by_visible_text(league_text)
                         season_name = 'Season ' + season.replace('-','/')
                         browser.implicitly_wait(delay0)
                         time.sleep(delay0)   
@@ -880,8 +887,9 @@ for num_season in range(len(years)):
                                 
                                 soup_clean_sheet = BeautifulSoup(browser.page_source, "html.parser" )
                                 goalkeeper_sw.clean_sheets = int(browser.find_element_by_id('stat-3').find_element_by_class_name('stat').get_attribute("innerHTML"))
-                            
+                                '''                            
                                 ptt_clean_sheet = soup_clean_sheet.find('div',{'id': 'the-graph-3'}).find('div',{'aria-label': arial_label}).find('tbody').findAll('tr')
+                                
                                 total_goals = 0
                                 for goals_conceed in xrange(len(ptt_clean_sheet)):
                                     date = ptt_clean_sheet[goals_conceed].findAll('td')[0].text
@@ -891,6 +899,7 @@ for num_season in range(len(years)):
                                 goalkeeper_sw.total_goal_conceed = total_goals
                                 
                                 goalkeeper_sw.avg_goals_conceed = float(browser.find_element_by_id('stat-4').find_element_by_class_name('stat').get_attribute("innerHTML"))
+                                '''
                                 not_fail = False
                             except:
                                 browser.implicitly_wait(delay1)
@@ -921,6 +930,7 @@ for num_season in range(len(years)):
                                 goalkeeper_sw.goals_open_play = int(goals_conced[1].text)
                                 goalkeeper_sw.goals_open_play_outside_box = int(goals_conced[1].text)
                                 goalkeeper_sw.goals_others = int(goals_conced[1].text)
+                                goalkeeper_sw.avg_goals_conceed =  goalkeeper_sw.goals_corner+goalkeeper_sw.goals_set_piece_crosses+goalkeeper_sw.goals_direct_free_kicks + goalkeeper_sw.goals_open_play + goalkeeper_sw.goals_open_play_outside_box + goalkeeper_sw.goals_others
                                 not_fail = False
                             except:
                                 browser.implicitly_wait(delay1)
