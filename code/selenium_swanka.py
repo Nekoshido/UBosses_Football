@@ -406,7 +406,7 @@ for num_season in range(len(years)):
                             time.sleep(delay1)        
                             
                 
-                    player_sw.app_tot = browser.find_element_by_id('stat-1').find_element_by_class_name('stat').get_attribute("innerHTML")
+                    player_sw.app_tot = int(browser.find_element_by_id('stat-1').find_element_by_class_name('stat').get_attribute("innerHTML"))
                     
                     
                     if(player_sw.app_tot>0):
