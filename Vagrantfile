@@ -13,6 +13,8 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/xenial64"
+  config.vm.synced_folder ".", "/vagrant"
+  config.vm.provision "shell", path: "provisioning_scripts/install_docker_ubuntu16.sh"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -67,10 +69,5 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
-  Vagrant.configure("2") do |config|
-    # other config here
-    config.vm.synced_folder "../.", "/vagrant"
-    config.vm.provision "shell", path: "provisioning_scripts/install_docker_ubuntu16.sh"
-  end
 
 end
