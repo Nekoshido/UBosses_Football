@@ -12,6 +12,6 @@ else:
 ffprofile = webdriver.FirefoxProfile()
 print('Trying to open with extension')
 
-ffprofile.add_extension(extension='../resources/addblock.xpi')
+ffprofile.add_extension(extension='../resources/uBlock.xpi')
 
 print('Finished load extension')
