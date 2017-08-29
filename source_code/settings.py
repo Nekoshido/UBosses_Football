@@ -14,5 +14,4 @@ print('Trying to open with extension')
 
 ffprofile.add_extension(extension='../resources/addblock.xpi')
 
-
 print('Finished load extension')
