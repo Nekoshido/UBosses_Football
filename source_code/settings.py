@@ -5,13 +5,13 @@ from selenium import webdriver
 
 # under different operating systems
 if platform.system() == 'Windows':
-    executable = '../resources/geckodriver.exe'
+    EXECUTABLE = '../resources/geckodriver.exe'
 else:
-    executable = '../resources/geckodriver'
+    EXECUTABLE = '../resources/geckodriver'
 
-ffprofile = webdriver.FirefoxProfile()
+FFPROFILE = webdriver.FirefoxProfile()
+
+# TODO migrate to BaseScraper load
 print('Trying to open with extension')
-
-ffprofile.add_extension(extension='../resources/addblock.xpi')
-
+FFPROFILE.add_extension(extension='../resources/addblock.xpi')
 print('Finished load extension')
