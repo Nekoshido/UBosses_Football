@@ -5,9 +5,7 @@ Created on Wed Aug 16 11:29:09 2017
 @author: Hector
 """
 import time
-from source_code.constants import squawka_constants
-from source_code import models
-from source_code import settings
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -15,6 +13,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
+
+from source_code import settings
+from source_code.constants import squawka_constants
+from source_code.models import squawka_models
 
 
 if __name__ == "__main__":
@@ -89,7 +91,7 @@ if __name__ == "__main__":
                 if (can_Load):
                     # 'Goalkeeper'
                     if (position != 'Goalkeeper'):
-                        player_sw = models.Player()
+                        player_sw = squawka_models.Player()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
@@ -630,7 +632,7 @@ if __name__ == "__main__":
 
                             players_file.write(write)
                     else:
-                        goalkeeper_sw = models.Goalkeeper()
+                        goalkeeper_sw = squawka_models.Goalkeeper()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
