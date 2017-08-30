@@ -18,10 +18,9 @@ from source_code import settings
 from source_code.constants import squawka_constants
 from source_code.models import squawka
 
-print(settings.EXECUTABLE)
 if __name__ == "__main__":
-    browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
-                                #executable_path=settings.EXECUTABLE)
+    browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,
+                                executable_path=settings.EXECUTABLE)
 
     for num_season in range(len(squawka_constants.YEARS)):
         season = squawka_constants.YEARS[num_season]
