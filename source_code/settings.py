@@ -7,13 +7,15 @@ from selenium import webdriver
 
 # under different operating systems
 if platform.system() == 'Windows':
-    EXECUTABLE = '../resources/geckodriver.exe'
+    EXECUTABLE = '../resources/firefox/firefox_driver/win/geckodriver.exe'
+elif platform.system() == 'Darwin':
+    EXECUTABLE = '../resources/firefox/firefox_driver/mac/geckodriver_mac'
 else:
-    EXECUTABLE = '../resources/geckodriver'
+    EXECUTABLE = '../resources/firefox/firefox_driver/linux/geckodriver'
 
 FFPROFILE = webdriver.FirefoxProfile()
 
 # TODO (casals) migrate to BaseScraper load
 print('Trying to open with extension')
-FFPROFILE.add_extension(extension='../resources/addblock.xpi')
+FFPROFILE.add_extension(extension='../resources/firefox/plugis/addblock/addblock.xpi')
 print('Finished load extension')
