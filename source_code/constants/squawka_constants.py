@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*-
 
-leagues = ['spanish-la-liga', 'english-premier-league', 'italian-serie-a', 'german-bundesliga',
+LEAGUES = ['spanish-la-liga', 'english-premier-league', 'italian-serie-a', 'german-bundesliga',
            'french-ligue-1', 'dutch-eredivisie', 'russian-premier-league', 'us-major-league-soccer',
            'brazilian-serie-a', 'mexican-liga-mx', 'mexican-primera-apertura', 'english-football-league-championship',
            'australian-a-league', 'turkish-super-lig', 'portuguese-primeira-liga']
-league_team_list = ['Spanish La Liga', 'English Barclays Premier League']
+LEAGUE_TEAM_LIST = ['Spanish La Liga', 'English Barclays Premier League']
 
 # league_num is the league
-league_num = 0
-league_text = league_team_list[league_num]
-url = 'http://www.squawka.com/football-stats/' + leagues[league_num] + '-season-'
+LEAGUE_NUM = 0
+LEAGUE_TEXT = LEAGUE_TEAM_LIST[LEAGUE_NUM]
+SQUAWKA_URL = 'http://www.squawka.com/football-stats/' + LEAGUES[LEAGUE_NUM] + '-season-'
 
-years = ['2012-2013', '2013-2014', '2014-2015', '2015-2016', '2016-2017']
-values_num = ['4', '69', '136', '176', '712']
-hdr = {'User-Agent': 'Mozilla/5.0'}
+YEARS = ['2012-2013', '2013-2014', '2014-2015', '2015-2016', '2016-2017']
+VALUES_NUM = ['4', '69', '136', '176', '712']
+HDR = {'User-Agent': 'Mozilla/5.0'}
 
 PLAYER_ID = 0
 
-delay0 = 5
-delay1 = 2
-delay = 8  # seconds
-delay2 = 10  # seconds
-arial_label = 'A tabular representation of the data in the chart.'
+DELAY = 8  # seconds
+DELAY0 = 5
+DELAY1 = 2
+DELAY2 = 10
 
-can_Load = True
+ARIAL_LABEL = 'A tabular representation of the data in the chart.'
 
-players_write = ('Name, Position_SW, Team, Age, Height, Weight, Year, Total Appearances, Full Appearances, '
+CAN_LOAD = True
+
+PLAYERS_WRITE = ('Name, Position_SW, Team, Age, Height, Weight, Year, Total Appearances, Full Appearances, '
                  'Sub ON Appearances, Sub OFF Appearances, Total Goals, Goals Right Foot, Goals Left Foot, Goals Head, '
                  'Other Goals, Shot Accuracy(%), Shots ON Target, Shots OFF Target, Blocked Shots, Goals Concerted, '
                  'Failed Goals, Total Chances Created, Player Assist, Player Key Passes, Total chances RB(%), '
@@ -44,7 +45,7 @@ players_write = ('Name, Position_SW, Team, Age, Height, Weight, Year, Total Appe
                  'Tackle Yellow Card, Verbal Yellow Card, Other Yellow Card, Total Red Card, Violence Red Card, '
                  'Tackle Red Card, Verbal Red Card, Other Red Card\n')
 
-goalkeepers_write = (
+GOALKEEPERS_WRITE = (
     'Name, Position_SW, Team, Age, Height, Weight, Year, Total Appearances, Full Appearances, Sub ON Appearances, '
     'Sub OFF Appearances, Clean Sheets, Total Goal Conceed,''Average Goals Conceed, Goals From Corner, '
     'Goals Set Piece Crosses, Goals Direct Free Kicks, Goals Open Play, Goals Open Play Outside Box, Other Goals, '
