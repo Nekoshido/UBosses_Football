@@ -14,15 +14,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from source_code import settings
 from source_code.constants import squawka_constants
 from source_code.models import squawka
+from source_code import settings
 
 if __name__ == "__main__":
     browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,
                                 executable_path=settings.EXECUTABLE)
 
-    for num_season in range(len(squawka_constants.YEARS)):
+    for num_season in range(len(squawka_constants.YEARS)):  # noqa
         season = squawka_constants.YEARS[num_season]
         site = '{}{}'.format(squawka_constants.SQUAWKA_URL, season)
         print(site)
@@ -65,16 +65,20 @@ if __name__ == "__main__":
                 # print 'Link: ', player_link
                 # player_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats'
                 # player_link = 'http://www.squawka.com/players/lionel-messi/stats'
-                pla_app_link = player_link + '#total-appearances#' + team_name + '#spanish-la-liga#23#season-' + season.replace(
-                    '-', '/') + "#" + squawka_constants.VALUES_NUM[num_season] + "#all-matches#1-38#by-match"
-                # pla_app_link = 'http://www.squawka.com/players/alexis-sanchez/stats#total-appearances#Barcelona#spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#by-match'
-                # pla_app_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats#total-appearances#barcelona-(current)#spanish-la-liga#23#season-2016/2017#712#all-matches#1-38#'
-                # pla_app_link = 'http://www.squawka.com/players/victor-valdes/stats#total-appearances#barcelona#spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#type'
+                pla_app_link = (player_link + '#total-appearances#' + team_name + '#spanish-la-liga#23#season-' +
+                                season.replace('-', '/') + "#" + squawka_constants.VALUES_NUM[num_season] +
+                                "#all-matches#1-38#by-match")
+                # pla_app_link = 'http://www.squawka.com/players/alexis-sanchez/stats#total-appearances#Barcelona#
+                # spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#by-match'
+                # pla_app_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats#total-appearances#
+                # barcelona-(current)#spanish-la-liga#23#season-2016/2017#712#all-matches#1-38#'
+                # pla_app_link = 'http://www.squawka.com/players/victor-valdes/stats#total-appearances#barcelona#
+                # spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#type'
                 try:
                     browser.get(pla_app_link)
                     can_Load = True
 
-                except:
+                except Exception:
                     print("Cannot access: " + pla_app_link)
                     can_Load = False
 
@@ -130,7 +134,7 @@ if __name__ == "__main__":
                             browser.implicitly_wait(squawka_constants.DELAY0)
                             time.sleep(squawka_constants.DELAY0)
 
-                        except:
+                        except Exception:
                             print('Loyal')
 
                         not_click = True
@@ -145,7 +149,7 @@ if __name__ == "__main__":
                                 app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
                                     'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                 not_click = False
-                            except:
+                            except Exception:
                                 browser.implicitly_wait(squawka_constants.DELAY1)
                                 time.sleep(squawka_constants.DELAY1)
 
@@ -159,7 +163,8 @@ if __name__ == "__main__":
                             soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
                             app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
                                 'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
-                            # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label': arial_label}).find('tbody').findAll('td').text
+                            # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label':
+                            # arial_label}).find('tbody').findAll('td').text
                             player_sw.app_full = int(app_list[1].text)
                             player_sw.app_sub_off = int(app_list[3].text)
                             player_sw.app_sub_on = int(app_list[5].text)
@@ -175,7 +180,9 @@ if __name__ == "__main__":
                                 actions.move_to_element(menu_goal)
                                 actions.click(menu_goal)
                                 actions.perform()
-                                # player_goal_part_link = player_link +'#total-goals-scored#'+team_name+'-(current)#spanish-la-liga#23#season-'+season.replace('-','/')+"#"+values_num[num_season]+"#all-matches#1-38#by-match#body-part"
+                                # player_goal_part_link = player_link +'#total-goals-scored#'+team_name+'-
+                                # (current)#spanish-la-liga#23#season-'+season.replace('-','/')+"#"
+                                # +values_num[num_season]+"#all-matches#1-38#by-match#body-part"
                                 # browser.get(player_goal_part_link)
                                 # browser.refresh()
                                 # browser.implicitly_wait(constants.delay2)
@@ -219,13 +226,12 @@ if __name__ == "__main__":
                                         player_sw.goal_head = int(goal_part[3].text)
                                         player_sw.goal_other = int(goal_part[4].text)
                                         not_click = False
-                                    except:
+                                    except Exception:
                                         browser.implicitly_wait(squawka_constants.DELAY1)
                                         time.sleep(squawka_constants.DELAY1)
-
-
-
-                                        # player_shoot_acc_link = player_link +'#shot-accuracy#'+team_name+'-(current)#spanish-la-liga#23#season-'+season.replace('-','/')+"#"+values_num[num_season]+"#all-matches#1-38#by-match#body-part"
+                                        # player_shoot_acc_link = player_link +'#shot-accuracy#'+team_name+'-(current)
+                                        # #spanish-la-liga#23#season-'+season.replace('-','/')+"#
+                                        # "+values_num[num_season]+"#all-matches#1-38#by-match#body-part"
                                         # browser.get(player_shoot_acc_link)
                                         # browser.refresh()
 
@@ -250,7 +256,7 @@ if __name__ == "__main__":
                                     shot_acc_list = soup_shot_part.find('p', {
                                         'id': 'dp-shotaccuracy-goalmouth-text'}).text.split(' ')
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -272,14 +278,15 @@ if __name__ == "__main__":
                                     shot_part = soup_shot_part_2.find('div', {'id': 'the-graph-4a'}).find('div', {
                                         'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
 
-                                    # player_sw.shot_acc = int(browser.find_element_by_id('stat-4').find_element_by_class_name('stat').get_attribute("innerHTML").split("%")[0])
+                                    # player_sw.shot_acc = int(browser.find_element_by_id('stat-4').find_element_by_
+                                    # class_name('stat').get_attribute("innerHTML").split("%")[0])
                                     player_sw.shot_on = int(shot_acc_list[0])
                                     player_sw.shot_off = int(shot_acc_list[5])
                                     player_sw.shot_block = int(shot_acc_list[10])
                                     player_sw.shot_conv = int(shot_part[1].text)
                                     player_sw.shot_fail = int(shot_part[3].text)
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -308,7 +315,7 @@ if __name__ == "__main__":
                                     player_sw.assist = int(chance_cre[1].text)
                                     player_sw.key_passes = int(chance_cre[2].text)
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -336,7 +343,7 @@ if __name__ == "__main__":
                                         player_sw.tt_chan_pitch.append(
                                             float(chance_map[chance_zone].text.split('%')[0]))
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -373,7 +380,7 @@ if __name__ == "__main__":
                                     player_sw.succ_cross_ball = int(''.join(chance_cre[4].text.split(",")))
                                     player_sw.unsucc_cross_ball = int(''.join(chance_cre[10].text.split(",")))
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -398,7 +405,7 @@ if __name__ == "__main__":
                                     player_sw.pass_forward = int(''.join(avg_pass_map[1].text.split(",")))
                                     player_sw.pass_backward = int(''.join(avg_pass_map[3].text.split(",")))
                                     not_click = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -426,7 +433,7 @@ if __name__ == "__main__":
                                     player_sw.avg_back_pass_length = int(pss_leng_lt[2].text)
                                     player_sw.avg_forw_pass_length = int(pss_leng_lt[3].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -468,7 +475,7 @@ if __name__ == "__main__":
                                     player_sw.succ_head_duel = int(duels_lt[0])
                                     player_sw.unsucc_head_duel = int(duels_lt[1])
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -495,7 +502,7 @@ if __name__ == "__main__":
                                     player_sw.interception = int(avg_def_lt[3].text)
                                     player_sw.block = int(avg_def_lt[5].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -522,7 +529,7 @@ if __name__ == "__main__":
                                         player_sw.led_attempt_goal = int(def_err_lt[1].text)
                                         player_sw.led_goal = int(def_err_lt[3].text)
                                         not_fail = False
-                                    except:
+                                    except Exception:
                                         browser.implicitly_wait(squawka_constants.DELAY1)
                                         time.sleep(squawka_constants.DELAY1)
 
@@ -551,7 +558,7 @@ if __name__ == "__main__":
                                     player_sw.oth_yel_card = int(yell_card_lt[4].text)
                                     player_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -580,7 +587,7 @@ if __name__ == "__main__":
                                     player_sw.verb_red_card = int(red_card_lt[3].text)
                                     player_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -664,7 +671,7 @@ if __name__ == "__main__":
 
                             browser.implicitly_wait(squawka_constants.DELAY0)
                             time.sleep(squawka_constants.DELAY0)
-                        except:
+                        except Exception:
                             print('Loyal')
 
                         # print browser.find_element_by_id('the-graph-1').get_attribute("innerHTML")
@@ -692,12 +699,13 @@ if __name__ == "__main__":
                                     app_list = app_list.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
                                     app_list = app_list.find('tbody')
                                     app_list = app_list.findAll('td')
-                                    # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label': constants.arial_label}).find('tbody').findAll('td').text
+                                    # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label'
+                                    # : constants.arial_label}).find('tbody').findAll('td').text
                                     goalkeeper_sw.app_full = int(app_list[1].text)
                                     goalkeeper_sw.app_sub_off = int(app_list[3].text)
                                     goalkeeper_sw.app_sub_on = int(app_list[5].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -717,21 +725,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.clean_sheets = int(
                                         browser.find_element_by_id('stat-3').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML"))
-                                    '''                            
-                                    ptt_clean_sheet = soup_clean_sheet.find('div',{'id': 'the-graph-3'}).find('div',{'aria-label': constants.arial_label}).find('tbody').findAll('tr')
-        
-                                    total_goals = 0
-                                    for goals_conceed in xrange(len(ptt_clean_sheet)):
-                                        date = ptt_clean_sheet[goals_conceed].findAll('td')[0].text
-                                        goals = int(ptt_clean_sheet[goals_conceed].findAll('td')[1].text)
-                                        total_goals = total_goals + goals
-                                        goalkeeper_sw.goal_conceed.append([date, goals])
-                                    goalkeeper_sw.total_goal_conceed = total_goals
-        
-                                    goalkeeper_sw.avg_goals_conceed = float(browser.find_element_by_id('stat-4').find_element_by_class_name('stat').get_attribute("innerHTML"))
-                                    '''
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -761,9 +756,13 @@ if __name__ == "__main__":
                                     goalkeeper_sw.goals_open_play = int(goals_conced[1].text)
                                     goalkeeper_sw.goals_open_play_outside_box = int(goals_conced[1].text)
                                     goalkeeper_sw.goals_others = int(goals_conced[1].text)
-                                    goalkeeper_sw.avg_goals_conceed = goalkeeper_sw.goals_corner + goalkeeper_sw.goals_set_piece_crosses + goalkeeper_sw.goals_direct_free_kicks + goalkeeper_sw.goals_open_play + goalkeeper_sw.goals_open_play_outside_box + goalkeeper_sw.goals_others
+                                    goalkeeper_sw.avg_goals_conceed = (
+                                        goalkeeper_sw.goals_corner + goalkeeper_sw.goals_set_piece_crosses +
+                                        goalkeeper_sw.goals_direct_free_kicks + goalkeeper_sw.goals_open_play +
+                                        goalkeeper_sw.goals_open_play_outside_box + goalkeeper_sw.goals_others
+                                    )
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -787,7 +786,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.total_goal_conceed2 = int(goals_conced.text)
                                     goalkeeper_sw.goals_zone = []
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -823,7 +822,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.saves_per_game_list = []
                                     goalkeeper_sw.num_saves = total_saves
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -849,7 +848,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.penalties_saved = (num_penalties[1].text)
                                     goalkeeper_sw.penalties_list = []
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
                             not_fail = True
@@ -883,7 +882,7 @@ if __name__ == "__main__":
 
                                     goalkeeper_sw.total_saves_goal = total_saves
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -924,7 +923,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.tot_claims_success = total_succ
                                     goalkeeper_sw.tot_claims_fail = total_unsucc
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -972,7 +971,7 @@ if __name__ == "__main__":
                                         browser.find_element_by_id('stat-10').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML").split('%')[0])
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -1003,7 +1002,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.succ_other = int(dist_succ[4].text)
                                     goalkeeper_sw.unsucc_other = int(dist_succ[9].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -1058,7 +1057,7 @@ if __name__ == "__main__":
 
                                     goalkeeper_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 
@@ -1087,7 +1086,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.verb_red_card = int(red_card_lt[3].text)
                                     goalkeeper_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
-                                except:
+                                except Exception:
                                     browser.implicitly_wait(squawka_constants.DELAY1)
                                     time.sleep(squawka_constants.DELAY1)
 

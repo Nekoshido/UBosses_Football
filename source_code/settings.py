@@ -15,7 +15,7 @@ else:
 
 FFPROFILE = webdriver.FirefoxProfile()
 
-# TODO (casals) migrate to BaseScraper load
+# TODO(casals) migrate to BaseScraper load
 print('Trying to open with extension')
 FFPROFILE.add_extension(extension='../resources/firefox/plugins/addblock/addblock.xpi')
 print('Finished load extension')

@@ -2,7 +2,7 @@
 import abc
 
 
-class BaseScraper:
+class BaseScraper(object):
 
     @abc.abstractmethod
     def load(self, **kwargs):
@@ -17,7 +17,7 @@ class BaseScraper:
         raise NotImplementedError("Subclasses should implement this!")
 
 
-class StatsScraper:
+class StatsScraper(object):
 
     @abc.abstractmethod
     def get_all_seasons(self, **kwargs):
