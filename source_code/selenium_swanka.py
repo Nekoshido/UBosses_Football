@@ -16,8 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from source_code import settings
 from source_code.constants import squawka_constants
-from source_code.models import squawka_models
-
+from source_code.models import squawka
 
 if __name__ == "__main__":
     browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,
@@ -46,7 +45,8 @@ if __name__ == "__main__":
             # TODO(aforaster) no estic segur que el format sigui correcte
             new_link = '{}#performance-score#spanish-la-liga#season-{}#{}{}'.format(link,
                                                                                     season.replace('-', '/'),
-                                                                                    squawka_constants.VALUES_NUM[num_season],
+                                                                                    squawka_constants.VALUES_NUM[
+                                                                                        num_season],
                                                                                     "#all-matches#1-38#by-match")
 
             browser.get(new_link)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 if (can_Load):
                     # 'Goalkeeper'
                     if (position != 'Goalkeeper'):
-                        player_sw = squawka_models.Player()
+                        player_sw = squawka.Player()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
@@ -391,7 +391,8 @@ if __name__ == "__main__":
                                     soup_menu_pass_avg = BeautifulSoup(browser.page_source, "html.parser")
                                     avg_pass_map = soup_menu_pass_avg.find('div', {'id': 'the-graph-7a'})
 
-                                    avg_pass_map = avg_pass_map.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    avg_pass_map = avg_pass_map.find('div',
+                                                                     {'aria-label': squawka_constants.ARIAL_LABEL})
                                     avg_pass_map = avg_pass_map.find('tbody')
                                     avg_pass_map = avg_pass_map.findAll('td')
                                     player_sw.pass_forward = int(''.join(avg_pass_map[1].text.split(",")))
@@ -516,7 +517,8 @@ if __name__ == "__main__":
                                         soup_defensive_error = BeautifulSoup(browser.page_source, "html.parser")
                                         def_err_lt = soup_defensive_error.find('div', {'id': 'the-graph-11'}).find(
                                             'div', {
-                                                'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                                'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll(
+                                            'td')
                                         player_sw.led_attempt_goal = int(def_err_lt[1].text)
                                         player_sw.led_goal = int(def_err_lt[3].text)
                                         not_fail = False
@@ -632,7 +634,7 @@ if __name__ == "__main__":
 
                             players_file.write(write)
                     else:
-                        goalkeeper_sw = squawka_models.Goalkeeper()
+                        goalkeeper_sw = squawka.Goalkeeper()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
@@ -748,7 +750,8 @@ if __name__ == "__main__":
                                     soup_goals_conceed = BeautifulSoup(browser.page_source, "html.parser")
 
                                     goals_conced = soup_goals_conceed.find('div', {'id': 'the-graph-4-type'})
-                                    goals_conced = goals_conced.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    goals_conced = goals_conced.find('div',
+                                                                     {'aria-label': squawka_constants.ARIAL_LABEL})
                                     goals_conced = goals_conced.find('tbody')
                                     goals_conced = goals_conced.findAll('td')
 
@@ -943,7 +946,8 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML").split('%')[0])
 
                                     avg_punches_m = soup_punches.find('div', {'id': 'the-graph-9-type'})
-                                    avg_punches_m = avg_punches_m.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    avg_punches_m = avg_punches_m.find('div',
+                                                                       {'aria-label': squawka_constants.ARIAL_LABEL})
                                     avg_punches_m = avg_punches_m.find('tbody')
                                     avg_punches_m = avg_punches_m.findAll('tr')
 
