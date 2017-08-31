@@ -14,17 +14,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from source_code.constants import squawka_constants
-from source_code.models import squawka
+from source_code.scraper.squawka_scraper.models import squawka_models, constants
 from source_code import settings
+
 
 if __name__ == "__main__":
     browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,
                                 executable_path=settings.EXECUTABLE)
 
-    for num_season in range(len(squawka_constants.YEARS)):  # noqa
-        season = squawka_constants.YEARS[num_season]
-        site = '{}{}'.format(squawka_constants.SQUAWKA_URL, season)
+    for num_season in range(len(constants.YEARS)):  # noqa
+        season = constants.YEARS[num_season]
+        site = '{}{}'.format(constants.SQUAWKA_URL, season)
         print(site)
         browser.get(site)
         page = browser.page_source
@@ -37,22 +37,22 @@ if __name__ == "__main__":
 
             players_file = open('%s-LaLiga-players-%s.csv' % (team_name, season), 'w')
             goalkeepers_file = open('%s- LaLiga-goalkeepers-%s.csv' % (team_name, season), 'w')
-            players_file.write(squawka_constants.PLAYERS_WRITE)
-            goalkeepers_file.write(squawka_constants.GOALKEEPERS_WRITE)
+            players_file.write(constants.PLAYERS_WRITE)
+            goalkeepers_file.write(constants.GOALKEEPERS_WRITE)
 
             link = team.get('href')
 
             # TODO(aforaster) no estic segur que el format sigui correcte
             new_link = '{}#performance-score#spanish-la-liga#season-{}#{}{}'.format(link,
                                                                                     season.replace('-', '/'),
-                                                                                    squawka_constants.VALUES_NUM[
+                                                                                    constants.VALUES_NUM[
                                                                                         num_season],
                                                                                     "#all-matches#1-38#by-match")
 
             browser.get(new_link)
-            browser.implicitly_wait(squawka_constants.DELAY)
+            browser.implicitly_wait(constants.DELAY)
 
-            time.sleep(squawka_constants.DELAY)
+            time.sleep(constants.DELAY)
 
             soup = BeautifulSoup(browser.page_source, "html.parser")
             players = soup.find('ul', {'id': 'players-list'})
@@ -66,7 +66,7 @@ if __name__ == "__main__":
                 # player_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats'
                 # player_link = 'http://www.squawka.com/players/lionel-messi/stats'
                 pla_app_link = (player_link + '#total-appearances#' + team_name + '#spanish-la-liga#23#season-' +
-                                season.replace('-', '/') + "#" + squawka_constants.VALUES_NUM[num_season] +
+                                season.replace('-', '/') + "#" + constants.VALUES_NUM[num_season] +
                                 "#all-matches#1-38#by-match")
                 # pla_app_link = 'http://www.squawka.com/players/alexis-sanchez/stats#total-appearances#Barcelona#
                 # spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#by-match'
@@ -82,9 +82,9 @@ if __name__ == "__main__":
                     print("Cannot access: " + pla_app_link)
                     can_Load = False
 
-                browser.implicitly_wait(squawka_constants.DELAY1)
+                browser.implicitly_wait(constants.DELAY1)
 
-                time.sleep(squawka_constants.DELAY1)
+                time.sleep(constants.DELAY1)
 
                 # action = webdriver.ActionChains(browser)
                 appearances = int(
@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 if (can_Load):
                     # 'Goalkeeper'
                     if (position != 'Goalkeeper'):
-                        player_sw = squawka.Player()
+                        player_sw = squawka_models.Player()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
@@ -117,13 +117,13 @@ if __name__ == "__main__":
 
                         try:
                             select = Select(browser.find_element_by_id('club_id')).select_by_visible_text(team_name)
-                            element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                            element = WebDriverWait(browser, constants.DELAY2).until(
                                 EC.presence_of_element_located((By.ID, "statistics-options")))
                             select = Select(browser.find_element_by_id('competition')).select_by_visible_text(
-                                squawka_constants.LEAGUE_TEXT)
+                                constants.LEAGUE_TEXT)
                             season_name = 'Season ' + season.replace('-', '/')
-                            browser.implicitly_wait(squawka_constants.DELAY0)
-                            time.sleep(squawka_constants.DELAY0)
+                            browser.implicitly_wait(constants.DELAY0)
+                            time.sleep(constants.DELAY0)
                             select = Select(browser.find_element_by_id('season')).select_by_visible_text(season_name)
 
                             menu_goal = browser.find_element_by_id('stat-1')
@@ -131,8 +131,8 @@ if __name__ == "__main__":
                             actions.move_to_element(menu_goal)
                             actions.click(menu_goal)
                             actions.perform()
-                            browser.implicitly_wait(squawka_constants.DELAY0)
-                            time.sleep(squawka_constants.DELAY0)
+                            browser.implicitly_wait(constants.DELAY0)
+                            time.sleep(constants.DELAY0)
 
                         except Exception:
                             print('Loyal')
@@ -147,11 +147,11 @@ if __name__ == "__main__":
                                 actions.perform()
                                 soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
                                 app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
-                                    'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                    'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                 not_click = False
                             except Exception:
-                                browser.implicitly_wait(squawka_constants.DELAY1)
-                                time.sleep(squawka_constants.DELAY1)
+                                browser.implicitly_wait(constants.DELAY1)
+                                time.sleep(constants.DELAY1)
 
                                 player_sw.app_tot = int(
                                     browser.find_element_by_id('stat-1').find_element_by_class_name(
@@ -162,7 +162,7 @@ if __name__ == "__main__":
                             print('Appearances: ', player_sw.app_tot)
                             soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
                             app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
-                                'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                             # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label':
                             # arial_label}).find('tbody').findAll('td').text
                             player_sw.app_full = int(app_list[1].text)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                                 # browser.implicitly_wait(constants.delay2)
                                 # time.sleep(constants.delay2)
 
-                                element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                element = WebDriverWait(browser, constants.DELAY2).until(
                                     EC.presence_of_element_located((By.ID, "stat-graph-3")))
                                 not_click = True
                                 while (not_click):
@@ -199,7 +199,7 @@ if __name__ == "__main__":
                                         actions.move_to_element(menu_goal)
                                         actions.click(menu_goal)
                                         actions.perform()
-                                        element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                        element = WebDriverWait(browser, constants.DELAY2).until(
                                             EC.presence_of_element_located((By.ID, "stat-graph-3")))
 
                                         menu_goal2 = browser.find_element_by_id('stat-3_body_part')
@@ -211,13 +211,13 @@ if __name__ == "__main__":
                                         # browser.implicitly_wait(constants.delay2)
 
                                         # time.sleep(constants.delay2)
-                                        element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                        element = WebDriverWait(browser, constants.DELAY2).until(
                                             EC.element_to_be_clickable((By.ID, "the-graph-3a")))
 
                                         soup_goal_part = BeautifulSoup(browser.page_source, "html.parser")
 
                                         goal_part = soup_goal_part.find('div', {'id': 'the-graph-3a'}).find('div', {
-                                            'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                            'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                         player_sw.goal_tot = int(
                                             browser.find_element_by_id('stat-3').find_element_by_class_name(
                                                 'stat').get_attribute("innerHTML"))
@@ -227,8 +227,8 @@ if __name__ == "__main__":
                                         player_sw.goal_other = int(goal_part[4].text)
                                         not_click = False
                                     except Exception:
-                                        browser.implicitly_wait(squawka_constants.DELAY1)
-                                        time.sleep(squawka_constants.DELAY1)
+                                        browser.implicitly_wait(constants.DELAY1)
+                                        time.sleep(constants.DELAY1)
                                         # player_shoot_acc_link = player_link +'#shot-accuracy#'+team_name+'-(current)
                                         # #spanish-la-liga#23#season-'+season.replace('-','/')+"#
                                         # "+values_num[num_season]+"#all-matches#1-38#by-match#body-part"
@@ -244,7 +244,7 @@ if __name__ == "__main__":
                                     actions.click(menu_goal)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "the-graph-4")))
                                     # browser.implicitly_wait(constants.delay2)
                                     # time.sleep(constants.delay2)
@@ -257,8 +257,8 @@ if __name__ == "__main__":
                                         'id': 'dp-shotaccuracy-goalmouth-text'}).text.split(' ')
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_click = True
                             while (not_click):
@@ -269,14 +269,14 @@ if __name__ == "__main__":
                                     actions.click(menu_shot)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "stat-graph-4")))
                                     # browser.implicitly_wait(constants.delay2)
                                     # time.sleep(constants.delay2)
 
                                     soup_shot_part_2 = BeautifulSoup(browser.page_source, "html.parser")
                                     shot_part = soup_shot_part_2.find('div', {'id': 'the-graph-4a'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
 
                                     # player_sw.shot_acc = int(browser.find_element_by_id('stat-4').find_element_by_
                                     # class_name('stat').get_attribute("innerHTML").split("%")[0])
@@ -287,8 +287,8 @@ if __name__ == "__main__":
                                     player_sw.shot_fail = int(shot_part[3].text)
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_click = True
                             while (not_click):
@@ -299,13 +299,13 @@ if __name__ == "__main__":
                                     actions.click(menu_chance)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "kaypass_bar")))
                                     # browser.implicitly_wait(constants.delay2)
                                     # time.sleep(constants.delay2)
                                     soup_chance = BeautifulSoup(browser.page_source, "html.parser")
                                     chance_cre = soup_chance.find('div', {'id': 'the-graph-6a'})
-                                    chance_cre = chance_cre.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    chance_cre = chance_cre.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     chance_cre = chance_cre.find('tbody')
                                     chance_cre = chance_cre.findAll('td')
                                     player_sw.tt_chances_created = int(
@@ -316,8 +316,8 @@ if __name__ == "__main__":
                                     player_sw.key_passes = int(chance_cre[2].text)
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_click = True
                             while (not_click):
@@ -330,7 +330,7 @@ if __name__ == "__main__":
                                     actions.click(menu_chance)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "dp-active-layer")))
                                     # browser.implicitly_wait(constants.delay2)
 
@@ -344,8 +344,8 @@ if __name__ == "__main__":
                                             float(chance_map[chance_zone].text.split('%')[0]))
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_click = True
                             while (not_click):
@@ -358,7 +358,7 @@ if __name__ == "__main__":
                                     actions.click(menu_pass)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-7")))
 
                                     soup_pass = BeautifulSoup(browser.page_source, "html.parser")
@@ -367,7 +367,7 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML").split('%')[0])
 
                                     chance_cre = soup_pass.find('div', {'id': 'the-graph-7'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
 
                                     player_sw.succ_pass = int(''.join(chance_cre[1].text.split(",")))
                                     player_sw.unsucc_pass = int(''.join(chance_cre[7].text.split(",")))
@@ -381,8 +381,8 @@ if __name__ == "__main__":
                                     player_sw.unsucc_cross_ball = int(''.join(chance_cre[10].text.split(",")))
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_click = True
                             while (not_click):
@@ -392,22 +392,22 @@ if __name__ == "__main__":
                                     actions.move_to_element(menu_chance)
                                     actions.click(menu_chance)
                                     actions.perform()
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "the-graph-7a")))
 
                                     soup_menu_pass_avg = BeautifulSoup(browser.page_source, "html.parser")
                                     avg_pass_map = soup_menu_pass_avg.find('div', {'id': 'the-graph-7a'})
 
                                     avg_pass_map = avg_pass_map.find('div',
-                                                                     {'aria-label': squawka_constants.ARIAL_LABEL})
+                                                                     {'aria-label': constants.ARIAL_LABEL})
                                     avg_pass_map = avg_pass_map.find('tbody')
                                     avg_pass_map = avg_pass_map.findAll('td')
                                     player_sw.pass_forward = int(''.join(avg_pass_map[1].text.split(",")))
                                     player_sw.pass_backward = int(''.join(avg_pass_map[3].text.split(",")))
                                     not_click = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -419,7 +419,7 @@ if __name__ == "__main__":
                                     actions.click(menu_length)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-8")))
 
                                     soup_length_pass = BeautifulSoup(browser.page_source, "html.parser")
@@ -428,14 +428,14 @@ if __name__ == "__main__":
                                         browser.find_element_by_id('stat-8').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML").split('m')[0])
                                     pss_leng_lt = soup_length_pass.find('div', {'id': 'the-graph-8'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                     player_sw.avg_long_ball_length = int(pss_leng_lt[1].text)
                                     player_sw.avg_back_pass_length = int(pss_leng_lt[2].text)
                                     player_sw.avg_forw_pass_length = int(pss_leng_lt[3].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -476,8 +476,8 @@ if __name__ == "__main__":
                                     player_sw.unsucc_head_duel = int(duels_lt[1])
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -488,7 +488,7 @@ if __name__ == "__main__":
                                     actions.click(menu_duels)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-10")))
 
                                     soup_avg_def = BeautifulSoup(browser.page_source, "html.parser")
@@ -497,14 +497,14 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML"))
 
                                     avg_def_lt = soup_avg_def.find('div', {'id': 'the-graph-10'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                     player_sw.def_clear = int(avg_def_lt[1].text)
                                     player_sw.interception = int(avg_def_lt[3].text)
                                     player_sw.block = int(avg_def_lt[5].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             player_sw.total_def_err = int(
                                 browser.find_element_by_id('stat-11').find_element_by_class_name('stat').get_attribute(
@@ -519,19 +519,19 @@ if __name__ == "__main__":
                                         actions.move_to_element(menu_def_error)
                                         actions.click(menu_def_error)
                                         actions.perform()
-                                        element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                        element = WebDriverWait(browser, constants.DELAY2).until(
                                             EC.element_to_be_clickable((By.ID, "stat-graph-11")))
                                         soup_defensive_error = BeautifulSoup(browser.page_source, "html.parser")
                                         def_err_lt = soup_defensive_error.find('div', {'id': 'the-graph-11'}).find(
                                             'div', {
-                                                'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll(
+                                                'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll(
                                             'td')
                                         player_sw.led_attempt_goal = int(def_err_lt[1].text)
                                         player_sw.led_goal = int(def_err_lt[3].text)
                                         not_fail = False
                                     except Exception:
-                                        browser.implicitly_wait(squawka_constants.DELAY1)
-                                        time.sleep(squawka_constants.DELAY1)
+                                        browser.implicitly_wait(constants.DELAY1)
+                                        time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -542,7 +542,7 @@ if __name__ == "__main__":
                                     actions.move_to_element(menu_cards)
                                     actions.click(menu_cards)
                                     actions.perform()
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-12")))
                                     soup_cards = BeautifulSoup(browser.page_source, "html.parser")
                                     cards_list = (
@@ -551,7 +551,7 @@ if __name__ == "__main__":
                                             "innerHTML")).split('/')
                                     player_sw.tot_yel_card = int(cards_list[0])
                                     yell_card_lt = soup_cards.find('div', {'id': 'the-graph-12'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                     player_sw.viol_yel_card = int(yell_card_lt[1].text)
                                     player_sw.tack_yel_card = int(yell_card_lt[2].text)
                                     player_sw.verb_yel_card = int(yell_card_lt[3].text)
@@ -559,8 +559,8 @@ if __name__ == "__main__":
                                     player_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -571,12 +571,12 @@ if __name__ == "__main__":
                                     actions.click(menu_chance)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "the-graph-12a")))
 
                                     soup_red_cards = BeautifulSoup(browser.page_source, "html.parser")
                                     red_card_lt = soup_red_cards.find('div', {'id': 'the-graph-12a'})
-                                    red_card_lt = red_card_lt.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    red_card_lt = red_card_lt.find('div', {'aria-label': constants.ARIAL_LABEL})
 
                                     red_card_lt = red_card_lt.find('tbody')
 
@@ -588,8 +588,8 @@ if __name__ == "__main__":
                                     player_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             write = player_sw.name.encode('utf-8') + ',' + str(player_sw.position_sw) + ',' + (
                                 player_sw.team).encode('utf-8') + ',' + str(player_sw.age) + ',' + str(
@@ -641,7 +641,7 @@ if __name__ == "__main__":
 
                             players_file.write(write)
                     else:
-                        goalkeeper_sw = squawka.Goalkeeper()
+                        goalkeeper_sw = squawka_models.Goalkeeper()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
                         tmp_name = tmp_name[:len(tmp_name) - 1]
@@ -660,17 +660,17 @@ if __name__ == "__main__":
 
                         try:
                             select = Select(browser.find_element_by_id('club_id')).select_by_visible_text(team_name)
-                            element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                            element = WebDriverWait(browser, constants.DELAY2).until(
                                 EC.presence_of_element_located((By.ID, "statistics-options")))
                             select = Select(browser.find_element_by_id('competition')).select_by_visible_text(
-                                squawka_constants.LEAGUE_TEXT)
+                                constants.LEAGUE_TEXT)
                             season_name = 'Season ' + season.replace('-', '/')
-                            browser.implicitly_wait(squawka_constants.DELAY0)
-                            time.sleep(squawka_constants.DELAY0)
+                            browser.implicitly_wait(constants.DELAY0)
+                            time.sleep(constants.DELAY0)
                             select = Select(browser.find_element_by_id('season')).select_by_visible_text(season_name)
 
-                            browser.implicitly_wait(squawka_constants.DELAY0)
-                            time.sleep(squawka_constants.DELAY0)
+                            browser.implicitly_wait(constants.DELAY0)
+                            time.sleep(constants.DELAY0)
                         except Exception:
                             print('Loyal')
 
@@ -690,13 +690,13 @@ if __name__ == "__main__":
                                     actions.click(menu_app)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-1")))
 
                                     soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
 
                                     app_list = soup_appearance.find('div', {'id': 'the-graph-1'})
-                                    app_list = app_list.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    app_list = app_list.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     app_list = app_list.find('tbody')
                                     app_list = app_list.findAll('td')
                                     # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label'
@@ -706,8 +706,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.app_sub_on = int(app_list[5].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -718,7 +718,7 @@ if __name__ == "__main__":
                                     actions.click(menu_clean)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-3")))
 
                                     soup_clean_sheet = BeautifulSoup(browser.page_source, "html.parser")
@@ -727,8 +727,8 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML"))
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -739,14 +739,14 @@ if __name__ == "__main__":
                                     actions.click(menu_app)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-4-type")))
 
                                     soup_goals_conceed = BeautifulSoup(browser.page_source, "html.parser")
 
                                     goals_conced = soup_goals_conceed.find('div', {'id': 'the-graph-4-type'})
                                     goals_conced = goals_conced.find('div',
-                                                                     {'aria-label': squawka_constants.ARIAL_LABEL})
+                                                                     {'aria-label': constants.ARIAL_LABEL})
                                     goals_conced = goals_conced.find('tbody')
                                     goals_conced = goals_conced.findAll('td')
 
@@ -763,8 +763,8 @@ if __name__ == "__main__":
                                     )
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -775,7 +775,7 @@ if __name__ == "__main__":
                                     actions.click(menu_clean)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-4-zone")))
                                     soup_goals_conceed = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -787,8 +787,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.goals_zone = []
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -799,7 +799,7 @@ if __name__ == "__main__":
                                     actions.click(menu_clean)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-6-type")))
                                     soup_goals_conceed = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -808,7 +808,7 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML"))
 
                                     saves_game = soup_goals_conceed.find('div', {'id': 'the-graph-6-type'})
-                                    saves_game = saves_game.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    saves_game = saves_game.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     saves_game = saves_game.find('tbody')
                                     saves_game = saves_game.findAll('tr')
 
@@ -823,8 +823,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.num_saves = total_saves
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -835,7 +835,7 @@ if __name__ == "__main__":
                                     actions.click(menu_penalty)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-penalty_success")))
                                     soup_penalties_map = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -849,8 +849,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.penalties_list = []
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
                             not_fail = True
                             while (not_fail):
                                 try:
@@ -860,7 +860,7 @@ if __name__ == "__main__":
                                     actions.click(menu_penalty)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "stat-graph-7")))
                                     soup_saves_goal = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -869,7 +869,7 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML"))
 
                                     saves_goal = soup_saves_goal.find('div', {'id': 'the-graph-7'})
-                                    saves_goal = saves_goal.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    saves_goal = saves_goal.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     saves_goal = saves_goal.find('tbody')
                                     saves_goal = saves_goal.findAll('tr')
 
@@ -883,8 +883,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.total_saves_goal = total_saves
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -895,7 +895,7 @@ if __name__ == "__main__":
                                     actions.click(menu_claim)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "stat-graph-8")))
                                     soup_claim_succ = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -904,7 +904,7 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML").split('%')[0])
 
                                     claims_succ = soup_claim_succ.find('div', {'id': 'the-graph-8-type'})
-                                    claims_succ = claims_succ.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    claims_succ = claims_succ.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     claims_succ = claims_succ.find('tbody')
                                     claims_succ = claims_succ.findAll('tr')
 
@@ -924,8 +924,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.tot_claims_fail = total_unsucc
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -936,7 +936,7 @@ if __name__ == "__main__":
                                     actions.click(menu_punch)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-9-type")))
                                     soup_punches = BeautifulSoup(browser.page_source, "html.parser")
 
@@ -946,7 +946,7 @@ if __name__ == "__main__":
 
                                     avg_punches_m = soup_punches.find('div', {'id': 'the-graph-9-type'})
                                     avg_punches_m = avg_punches_m.find('div',
-                                                                       {'aria-label': squawka_constants.ARIAL_LABEL})
+                                                                       {'aria-label': constants.ARIAL_LABEL})
                                     avg_punches_m = avg_punches_m.find('tbody')
                                     avg_punches_m = avg_punches_m.findAll('tr')
 
@@ -972,8 +972,8 @@ if __name__ == "__main__":
                                             'stat').get_attribute("innerHTML").split('%')[0])
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -984,12 +984,12 @@ if __name__ == "__main__":
                                     actions.click(menu_dist_success)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-10-type")))
                                     soup_dist_succ = BeautifulSoup(browser.page_source, "html.parser")
 
                                     dist_succ = soup_dist_succ.find('div', {'id': 'the-graph-10-type'})
-                                    dist_succ = dist_succ.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    dist_succ = dist_succ.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     dist_succ = dist_succ.find('tbody')
                                     dist_succ = dist_succ.findAll('td')
 
@@ -1003,8 +1003,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.unsucc_other = int(dist_succ[9].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             menu_dist_length = browser.find_element_by_id('stat-11')
                             actions = ActionChains(browser)
@@ -1012,12 +1012,12 @@ if __name__ == "__main__":
                             actions.click(menu_dist_length)
                             actions.perform()
 
-                            element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                            element = WebDriverWait(browser, constants.DELAY2).until(
                                 EC.element_to_be_clickable((By.ID, "the-graph-11-type")))
                             soup_dist_length = BeautifulSoup(browser.page_source, "html.parser")
 
                             dist_length = soup_dist_length.find('div', {'id': 'the-graph-11-type'})
-                            dist_length = dist_length.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                            dist_length = dist_length.find('div', {'aria-label': constants.ARIAL_LABEL})
                             dist_length = dist_length.find('tbody')
                             dist_length = dist_length.findAll('td')
 
@@ -1037,7 +1037,7 @@ if __name__ == "__main__":
                                     actions.click(menu_cards)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.element_to_be_clickable((By.ID, "the-graph-12")))
 
                                     soup_cards = BeautifulSoup(browser.page_source, "html.parser")
@@ -1049,7 +1049,7 @@ if __name__ == "__main__":
 
                                     goalkeeper_sw.tot_yel_card = int(cards_list[0])
                                     yell_card_lt = soup_cards.find('div', {'id': 'the-graph-12'}).find('div', {
-                                        'aria-label': squawka_constants.ARIAL_LABEL}).find('tbody').findAll('td')
+                                        'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                     goalkeeper_sw.viol_yel_card = int(yell_card_lt[1].text)
                                     goalkeeper_sw.tack_yel_card = int(yell_card_lt[2].text)
                                     goalkeeper_sw.verb_yel_card = int(yell_card_lt[3].text)
@@ -1058,8 +1058,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             not_fail = True
                             while (not_fail):
@@ -1070,12 +1070,12 @@ if __name__ == "__main__":
                                     actions.click(menu_chance)
                                     actions.perform()
 
-                                    element = WebDriverWait(browser, squawka_constants.DELAY2).until(
+                                    element = WebDriverWait(browser, constants.DELAY2).until(
                                         EC.presence_of_element_located((By.ID, "stat-graph-12-red")))
 
                                     soup_red_cards = BeautifulSoup(browser.page_source, "html.parser")
                                     red_card_lt = soup_red_cards.find('div', {'id': 'the-graph-12a'})
-                                    red_card_lt = red_card_lt.find('div', {'aria-label': squawka_constants.ARIAL_LABEL})
+                                    red_card_lt = red_card_lt.find('div', {'aria-label': constants.ARIAL_LABEL})
 
                                     red_card_lt = red_card_lt.find('tbody')
 
@@ -1087,8 +1087,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
                                 except Exception:
-                                    browser.implicitly_wait(squawka_constants.DELAY1)
-                                    time.sleep(squawka_constants.DELAY1)
+                                    browser.implicitly_wait(constants.DELAY1)
+                                    time.sleep(constants.DELAY1)
 
                             write = str(goalkeeper_sw.name) + ',' + str(goalkeeper_sw.position_sw) + ',' + str(
                                 goalkeeper_sw.team) + ',' + str(goalkeeper_sw.age) + ',' + str(
