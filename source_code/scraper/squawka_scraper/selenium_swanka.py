@@ -19,9 +19,10 @@ from source_code import settings
 
 
 if __name__ == "__main__":
-    browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,
-                                executable_path=settings.EXECUTABLE)
-
+    try:
+        browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,executable_path=settings.EXECUTABLE)
+    except:
+        browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
     for num_season in range(len(constants.YEARS)):  # noqa
         season = constants.YEARS[num_season]
         site = '{}{}'.format(constants.SQUAWKA_URL, season)
@@ -34,20 +35,23 @@ if __name__ == "__main__":
         for team in teams:
             team_name = team.find('span', {'class': 'fsclt-club-name'}).text
             print(team_name)
-
-            players_file = open('%s-LaLiga-players-%s.csv' % (team_name, season), 'w')
-            goalkeepers_file = open('%s- LaLiga-goalkeepers-%s.csv' % (team_name, season), 'w')
+            players_file_name = '%s- %s - Players-%s.csv' % (team_name,  constants.LEAGUE_URL, season)
+            goalkeepers_file_name = '%s- %s - Goalkeepers-%s.csv' % (team_name, constants.LEAGUE_URL, season)
+            players_file = open(players_file_name, 'w')
+            goalkeepers_file = open(goalkeepers_file_name, 'w')
             players_file.write(constants.PLAYERS_WRITE)
             goalkeepers_file.write(constants.GOALKEEPERS_WRITE)
 
             link = team.get('href')
 
             # TODO(aforaster) no estic segur que el format sigui correcte
-            new_link = '{}#performance-score#spanish-la-liga#season-{}#{}{}'.format(link,
-                                                                                    season.replace('-', '/'),
-                                                                                    constants.VALUES_NUM[
-                                                                                        num_season],
-                                                                                    "#all-matches#1-38#by-match")
+            new_link = '{}#performance-score#{}#season-{}#{}{}{}{}'.format(link,
+                                                                           constants.LEAGUE_URL,
+                                                                           season.replace('-', '/'),
+                                                                           constants.SEASON_INDEX_LIST[num_season],
+                                                                           "#all-matches#1-",
+                                                                           str(len(teams)-2),
+                                                                           "#by-match")
 
             browser.get(new_link)
             browser.implicitly_wait(constants.DELAY)
@@ -62,18 +66,14 @@ if __name__ == "__main__":
                 name = player.find('span', {'class': 'name'}).text
                 position = player.find('span', {'class': 'position'}).text
                 player_link = player.get('href')
-                # print 'Link: ', player_link
-                # player_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats'
-                # player_link = 'http://www.squawka.com/players/lionel-messi/stats'
-                pla_app_link = (player_link + '#total-appearances#' + team_name + '#spanish-la-liga#23#season-' +
-                                season.replace('-', '/') + "#" + constants.VALUES_NUM[num_season] +
-                                "#all-matches#1-38#by-match")
-                # pla_app_link = 'http://www.squawka.com/players/alexis-sanchez/stats#total-appearances#Barcelona#
-                # spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#by-match'
-                # pla_app_link = 'http://www.squawka.com/players/marc-andre-ter-stegen/stats#total-appearances#
-                # barcelona-(current)#spanish-la-liga#23#season-2016/2017#712#all-matches#1-38#'
-                # pla_app_link = 'http://www.squawka.com/players/victor-valdes/stats#total-appearances#barcelona#
-                # spanish-la-liga#23#season-2012/2013#4#all-matches#1-38#type'
+                pla_app_link = '{}#total-appearances#{}#{}#{}#season-{}#{}#all-matches#1-{}#by-match'.format(player_link,
+                                                                                                             team_name,
+                                                                                                             constants.LEAGUE_URL,
+                                                                                                             constants.LEAGUE_INDEX_NUM,
+                                                                                                             season.replace('-', '/'),
+                                                                                                             constants.SEASON_INDEX_LIST[ num_season],
+                                                                                                             str(len(teams)- 2))
+
                 try:
                     browser.get(pla_app_link)
                     can_Load = True
@@ -89,7 +89,6 @@ if __name__ == "__main__":
                 # action = webdriver.ActionChains(browser)
                 appearances = int(
                     browser.find_element_by_id('stat-1').find_element_by_class_name('stat').get_attribute("innerHTML"))
-                # action.move_to_element(element).perform()
 
                 soup_players = BeautifulSoup(browser.page_source, "html.parser")
                 if (can_Load):
@@ -153,8 +152,8 @@ if __name__ == "__main__":
                                 browser.implicitly_wait(constants.DELAY1)
                                 time.sleep(constants.DELAY1)
 
-                                player_sw.app_tot = int(
-                                    browser.find_element_by_id('stat-1').find_element_by_class_name(
+                        player_sw.app_tot = int(
+                            browser.find_element_by_id('stat-1').find_element_by_class_name(
                                         'stat').get_attribute(
                                         "innerHTML"))
 
@@ -163,8 +162,6 @@ if __name__ == "__main__":
                             soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
                             app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
                                 'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
-                            # print soup_appearance.find('div',{'id': 'stat-graph-1'}).find('div',{'aria-label':
-                            # arial_label}).find('tbody').findAll('td').text
                             player_sw.app_full = int(app_list[1].text)
                             player_sw.app_sub_off = int(app_list[3].text)
                             player_sw.app_sub_on = int(app_list[5].text)
@@ -591,9 +588,10 @@ if __name__ == "__main__":
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
-                            write = player_sw.name.encode('utf-8') + ',' + str(player_sw.position_sw) + ',' + (
-                                player_sw.team).encode('utf-8') + ',' + str(player_sw.age) + ',' + str(
+                            write = str(player_sw.name.encode('utf-8') )+ ',' + str(player_sw.position_sw) + ',' + str(
+                                player_sw.team.encode('utf-8')) + ',' + str(player_sw.age) + ',' + str(
                                 player_sw.height) + ',' + str(player_sw.weight) + ',' + str(player_sw.year) + ','
+
                             write = write + str(player_sw.app_tot) + ',' + str(player_sw.app_full) + ',' + str(
                                 player_sw.app_sub_on) + ',' + str(player_sw.app_sub_off) + ','
                             write = write + str(player_sw.goal_tot) + ',' + str(player_sw.goal_right) + ',' + str(
@@ -1089,9 +1087,8 @@ if __name__ == "__main__":
                                 except Exception:
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
-
-                            write = str(goalkeeper_sw.name) + ',' + str(goalkeeper_sw.position_sw) + ',' + str(
-                                goalkeeper_sw.team) + ',' + str(goalkeeper_sw.age) + ',' + str(
+                            write = str(goalkeeper_sw.name.encode('utf-8')) + ',' + str(goalkeeper_sw.position_sw) + ',' + str(
+                                goalkeeper_sw.team.encode('utf-8')) + ',' + str(goalkeeper_sw.age) + ',' + str(
                                 goalkeeper_sw.height) + ',' + str(goalkeeper_sw.weight) + ',' + str(
                                 goalkeeper_sw.year) + ','
                             write = write + str(goalkeeper_sw.app_tot) + ',' + str(goalkeeper_sw.app_full) + ',' + str(
