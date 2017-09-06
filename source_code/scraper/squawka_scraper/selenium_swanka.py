@@ -17,10 +17,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from source_code.scraper.squawka_scraper.models import squawka_models, constants
 from source_code import settings
 
-
 if __name__ == "__main__":
     try:
-        browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE,executable_path=settings.EXECUTABLE)
+        browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE, executable_path=settings.EXECUTABLE)
     except:
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
     for num_season in range(len(constants.YEARS)):  # noqa
@@ -35,7 +34,7 @@ if __name__ == "__main__":
         for team in teams:
             team_name = team.find('span', {'class': 'fsclt-club-name'}).text
             print(team_name)
-            players_file_name = '%s- %s - Players-%s.csv' % (team_name,  constants.LEAGUE_URL, season)
+            players_file_name = '%s- %s - Players-%s.csv' % (team_name, constants.LEAGUE_URL, season)
             goalkeepers_file_name = '%s- %s - Goalkeepers-%s.csv' % (team_name, constants.LEAGUE_URL, season)
             players_file = open(players_file_name, 'w')
             goalkeepers_file = open(goalkeepers_file_name, 'w')
@@ -44,13 +43,12 @@ if __name__ == "__main__":
 
             link = team.get('href')
 
-            # TODO(aforaster) no estic segur que el format sigui correcte
             new_link = '{}#performance-score#{}#season-{}#{}{}{}{}'.format(link,
                                                                            constants.LEAGUE_URL,
                                                                            season.replace('-', '/'),
                                                                            constants.SEASON_INDEX_LIST[num_season],
                                                                            "#all-matches#1-",
-                                                                           str(len(teams)-2),
+                                                                           str(len(teams) - 2),
                                                                            "#by-match")
 
             browser.get(new_link)
@@ -66,19 +64,13 @@ if __name__ == "__main__":
                 name = player.find('span', {'class': 'name'}).text
                 position = player.find('span', {'class': 'position'}).text
                 player_link = player.get('href')
-                pla_app_link = '{}#total-appearances#{}#{}#{}#season-{}#{}#all-matches#1-{}#by-match'.format(player_link,
-                                                                                                             team_name,
-                                                                                                             constants.LEAGUE_URL,
-                                                                                                             constants.LEAGUE_INDEX_NUM,
-                                                                                                             season.replace('-', '/'),
-                                                                                                             constants.SEASON_INDEX_LIST[ num_season],
-                                                                                                             str(len(teams)- 2))
+                pla_app_link = f'{player_link}#total-appearances#{team_name}#{constants.LEAGUE_URL}#{constants.LEAGUE_INDEX_NUM}#season-{season.replace("-", "/")}#{constants.SEASON_INDEX_LIST[ num_season]}#all-matches#1-{str(len(teams)- 2)}#by-match'
 
                 try:
                     browser.get(pla_app_link)
                     can_Load = True
 
-                except Exception:
+                except Exception: # noqa
                     print("Cannot access: " + pla_app_link)
                     can_Load = False
 
@@ -91,9 +83,9 @@ if __name__ == "__main__":
                     browser.find_element_by_id('stat-1').find_element_by_class_name('stat').get_attribute("innerHTML"))
 
                 soup_players = BeautifulSoup(browser.page_source, "html.parser")
-                if (can_Load):
+                if can_Load:
                     # 'Goalkeeper'
-                    if (position != 'Goalkeeper'):
+                    if position != 'Goalkeeper':
                         player_sw = squawka_models.Player()
 
                         tmp_name = soup_players.find('div', {'id': 'playerssecontent'}).text.split('\n')[2].split(" ")
@@ -112,8 +104,6 @@ if __name__ == "__main__":
                         weight_t = soup_players.find('a', {'title': weight_str}).text
                         player_sw.weight = weight_t.split('\n')[2]
 
-                        # print browser.find_element_by_id('the-graph-1').get_attribute("innerHTML")
-
                         try:
                             select = Select(browser.find_element_by_id('club_id')).select_by_visible_text(team_name)
                             element = WebDriverWait(browser, constants.DELAY2).until(
@@ -123,8 +113,8 @@ if __name__ == "__main__":
                             season_name = 'Season ' + season.replace('-', '/')
                             browser.implicitly_wait(constants.DELAY0)
                             time.sleep(constants.DELAY0)
+                            # TODO Hector: Check season bug, player has not this season
                             select = Select(browser.find_element_by_id('season')).select_by_visible_text(season_name)
-
                             menu_goal = browser.find_element_by_id('stat-1')
                             actions = ActionChains(browser)
                             actions.move_to_element(menu_goal)
@@ -133,11 +123,11 @@ if __name__ == "__main__":
                             browser.implicitly_wait(constants.DELAY0)
                             time.sleep(constants.DELAY0)
 
-                        except Exception:
+                        except Exception:  # noqa
                             print('Loyal')
 
                         not_click = True
-                        while (not_click):
+                        while not_click:
                             try:
                                 menu_goal = browser.find_element_by_id('stat-1')
                                 actions = ActionChains(browser)
@@ -148,16 +138,16 @@ if __name__ == "__main__":
                                 app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
                                     'aria-label': constants.ARIAL_LABEL}).find('tbody').findAll('td')
                                 not_click = False
-                            except Exception:
+                            except Exception:  # noqa
                                 browser.implicitly_wait(constants.DELAY1)
                                 time.sleep(constants.DELAY1)
 
                         player_sw.app_tot = int(
                             browser.find_element_by_id('stat-1').find_element_by_class_name(
-                                        'stat').get_attribute(
-                                        "innerHTML"))
+                                'stat').get_attribute(
+                                "innerHTML"))
 
-                        if (player_sw.app_tot > 0):
+                        if player_sw.app_tot > 0:
                             print('Appearances: ', player_sw.app_tot)
                             soup_appearance = BeautifulSoup(browser.page_source, "html.parser")
                             app_list = soup_appearance.find('div', {'id': 'stat-graph-1'}).find('div', {
@@ -168,7 +158,7 @@ if __name__ == "__main__":
 
                             player_sw.goal_tot = browser.find_element_by_id('stat-3').find_element_by_class_name(
                                 'stat').get_attribute("innerHTML")
-                            if (player_sw.goal_tot != 0):
+                            if player_sw.goal_tot != 0:
 
                                 # browser.execute_script("window.scrollBy(0,840);")
 
@@ -188,7 +178,7 @@ if __name__ == "__main__":
                                 element = WebDriverWait(browser, constants.DELAY2).until(
                                     EC.presence_of_element_located((By.ID, "stat-graph-3")))
                                 not_click = True
-                                while (not_click):
+                                while not_click:
                                     try:
 
                                         menu_goal = browser.find_element_by_id('stat-3')
@@ -223,7 +213,7 @@ if __name__ == "__main__":
                                         player_sw.goal_head = int(goal_part[3].text)
                                         player_sw.goal_other = int(goal_part[4].text)
                                         not_click = False
-                                    except Exception:
+                                    except Exception:  # noqa
                                         browser.implicitly_wait(constants.DELAY1)
                                         time.sleep(constants.DELAY1)
                                         # player_shoot_acc_link = player_link +'#shot-accuracy#'+team_name+'-(current)
@@ -233,7 +223,7 @@ if __name__ == "__main__":
                                         # browser.refresh()
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
                                     menu_goal = browser.find_element_by_id('stat-4')
                                     actions = ActionChains(browser)
@@ -253,12 +243,12 @@ if __name__ == "__main__":
                                     shot_acc_list = soup_shot_part.find('p', {
                                         'id': 'dp-shotaccuracy-goalmouth-text'}).text.split(' ')
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
                                     menu_shot = browser.find_element_by_id('stat-4_conversion')
                                     actions = ActionChains(browser)
@@ -283,12 +273,12 @@ if __name__ == "__main__":
                                     player_sw.shot_conv = int(shot_part[1].text)
                                     player_sw.shot_fail = int(shot_part[3].text)
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
                                     menu_chance = browser.find_element_by_id('stat-6')
                                     actions.reset_actions()
@@ -312,16 +302,14 @@ if __name__ == "__main__":
                                     player_sw.assist = int(chance_cre[1].text)
                                     player_sw.key_passes = int(chance_cre[2].text)
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
-
                                     menu_chance = browser.find_element_by_id('stat-6_pitch_view')
-
                                     actions = ActionChains(browser)
                                     actions.move_to_element(menu_chance)
                                     actions.click(menu_chance)
@@ -340,12 +328,12 @@ if __name__ == "__main__":
                                         player_sw.tt_chan_pitch.append(
                                             float(chance_map[chance_zone].text.split('%')[0]))
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
 
                                     menu_pass = browser.find_element_by_id('stat-7')
@@ -377,12 +365,12 @@ if __name__ == "__main__":
                                     player_sw.succ_cross_ball = int(''.join(chance_cre[4].text.split(",")))
                                     player_sw.unsucc_cross_ball = int(''.join(chance_cre[10].text.split(",")))
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_click = True
-                            while (not_click):
+                            while not_click:
                                 try:
                                     menu_chance = browser.find_element_by_id('stat-7_type')
                                     actions = ActionChains(browser)
@@ -402,12 +390,12 @@ if __name__ == "__main__":
                                     player_sw.pass_forward = int(''.join(avg_pass_map[1].text.split(",")))
                                     player_sw.pass_backward = int(''.join(avg_pass_map[3].text.split(",")))
                                     not_click = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_length = browser.find_element_by_id('stat-8')
 
@@ -430,12 +418,12 @@ if __name__ == "__main__":
                                     player_sw.avg_back_pass_length = int(pss_leng_lt[2].text)
                                     player_sw.avg_forw_pass_length = int(pss_leng_lt[3].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
 
                                     menu_duels = browser.find_element_by_id('stat-9')
@@ -472,12 +460,12 @@ if __name__ == "__main__":
                                     player_sw.succ_head_duel = int(duels_lt[0])
                                     player_sw.unsucc_head_duel = int(duels_lt[1])
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_duels = browser.find_element_by_id('stat-10')
                                     actions = ActionChains(browser)
@@ -499,17 +487,17 @@ if __name__ == "__main__":
                                     player_sw.interception = int(avg_def_lt[3].text)
                                     player_sw.block = int(avg_def_lt[5].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             player_sw.total_def_err = int(
                                 browser.find_element_by_id('stat-11').find_element_by_class_name('stat').get_attribute(
                                     "innerHTML"))
-                            if (player_sw.total_def_err > 0):
+                            if player_sw.total_def_err > 0:
 
                                 not_fail = True
-                                while (not_fail):
+                                while not_fail:
                                     try:
                                         menu_def_error = browser.find_element_by_id('stat-11')
                                         actions = ActionChains(browser)
@@ -526,12 +514,12 @@ if __name__ == "__main__":
                                         player_sw.led_attempt_goal = int(def_err_lt[1].text)
                                         player_sw.led_goal = int(def_err_lt[3].text)
                                         not_fail = False
-                                    except Exception:
+                                    except Exception:  # noqa
                                         browser.implicitly_wait(constants.DELAY1)
                                         time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_cards = browser.find_element_by_id('stat-12')
 
@@ -555,12 +543,12 @@ if __name__ == "__main__":
                                     player_sw.oth_yel_card = int(yell_card_lt[4].text)
                                     player_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_chance = browser.find_element_by_id('stat-12_red_cards')
                                     actions = ActionChains(browser)
@@ -584,19 +572,21 @@ if __name__ == "__main__":
                                     player_sw.verb_red_card = int(red_card_lt[3].text)
                                     player_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
-                            write = str(player_sw.name.encode('utf-8') )+ ',' + str(player_sw.position_sw) + ',' + str(
-                                player_sw.team.encode('utf-8')) + ',' + str(player_sw.age) + ',' + str(
-                                player_sw.height) + ',' + str(player_sw.weight) + ',' + str(player_sw.year) + ','
+                            write = '{0},{1},{2},{3},{4},{5},{6},'.format(str(player_sw.name.encode('utf-8')),
+                                                                          str(player_sw.position_sw), str(
+                                    player_sw.team.encode('utf-8')), str(player_sw.age), str(
+                                    player_sw.height), str(player_sw.weight), str(player_sw.year))
 
                             write = write + str(player_sw.app_tot) + ',' + str(player_sw.app_full) + ',' + str(
                                 player_sw.app_sub_on) + ',' + str(player_sw.app_sub_off) + ','
-                            write = write + str(player_sw.goal_tot) + ',' + str(player_sw.goal_right) + ',' + str(
-                                player_sw.goal_left) + ',' + str(player_sw.goal_head) + ',' + str(
-                                player_sw.goal_other) + ','
+                            write = '{0}{1},{2},{3},{4},{5},'.format(write, str(player_sw.goal_tot),
+                                                                     str(player_sw.goal_right), str(
+                                    player_sw.goal_left), str(player_sw.goal_head), str(
+                                    player_sw.goal_other))
                             write = write + str(player_sw.shot_acc) + ',' + str(player_sw.shot_on) + ',' + str(
                                 player_sw.shot_off) + ',' + str(player_sw.shot_block) + ',' + str(
                                 player_sw.shot_conv) + ',' + str(player_sw.shot_fail) + ','
@@ -669,17 +659,17 @@ if __name__ == "__main__":
 
                             browser.implicitly_wait(constants.DELAY0)
                             time.sleep(constants.DELAY0)
-                        except Exception:
+                        except Exception:  # noqa
                             print('Loyal')
 
                         # print browser.find_element_by_id('the-graph-1').get_attribute("innerHTML")
                         goalkeeper_sw.app_tot = int(
                             browser.find_element_by_id('stat-1').find_element_by_class_name('stat').get_attribute(
                                 "innerHTML"))
-                        if (goalkeeper_sw.app_tot > 0):
+                        if goalkeeper_sw.app_tot > 0:
                             print('Appearances: ', goalkeeper_sw.app_tot)
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_app = browser.find_element_by_id('stat-1')
 
@@ -703,12 +693,12 @@ if __name__ == "__main__":
                                     goalkeeper_sw.app_sub_off = int(app_list[3].text)
                                     goalkeeper_sw.app_sub_on = int(app_list[5].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:   # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_clean = browser.find_element_by_id('stat-3')
                                     actions = ActionChains(browser)
@@ -724,12 +714,12 @@ if __name__ == "__main__":
                                         browser.find_element_by_id('stat-3').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML"))
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_app = browser.find_element_by_id('stat-4')
                                     actions = ActionChains(browser)
@@ -760,12 +750,12 @@ if __name__ == "__main__":
                                         goalkeeper_sw.goals_open_play_outside_box + goalkeeper_sw.goals_others
                                     )
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_clean = browser.find_element_by_id('stat-4_zone')
                                     actions = ActionChains(browser)
@@ -784,12 +774,12 @@ if __name__ == "__main__":
                                     goalkeeper_sw.total_goal_conceed2 = int(goals_conced.text)
                                     goalkeeper_sw.goals_zone = []
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_clean = browser.find_element_by_id('stat-6')
                                     actions = ActionChains(browser)
@@ -804,28 +794,30 @@ if __name__ == "__main__":
                                     goalkeeper_sw.avg_saves_per_game = float(
                                         browser.find_element_by_id('stat-6').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML"))
+                                    if goalkeeper_sw.avg_saves_per_game <= 0.0:
+                                        not_fail = False
+                                    else:
+                                        saves_game = soup_goals_conceed.find('div', {'id': 'the-graph-6-type'})
+                                        saves_game = saves_game.find('div', {'aria-label': constants.ARIAL_LABEL})
+                                        saves_game = saves_game.find('tbody')
+                                        saves_game = saves_game.findAll('tr')
 
-                                    saves_game = soup_goals_conceed.find('div', {'id': 'the-graph-6-type'})
-                                    saves_game = saves_game.find('div', {'aria-label': constants.ARIAL_LABEL})
-                                    saves_game = saves_game.find('tbody')
-                                    saves_game = saves_game.findAll('tr')
+                                        total_saves = 0
+                                        for saves_con in range(len(saves_game)):
+                                            date = saves_game[saves_con].findAll('td')[0].text
+                                            saves = int(saves_game[saves_con].findAll('td')[1].text)
+                                            total_saves = total_saves + saves
+                                            goalkeeper_sw.saves_per_game_list.append([date, saves])
 
-                                    total_saves = 0
-                                    for saves_con in range(len(saves_game)):
-                                        date = saves_game[saves_con].findAll('td')[0].text
-                                        saves = int(saves_game[saves_con].findAll('td')[1].text)
-                                        total_saves = total_saves + saves
-                                        goalkeeper_sw.saves_per_game_list.append([date, saves])
-
-                                    goalkeeper_sw.saves_per_game_list = []
-                                    goalkeeper_sw.num_saves = total_saves
-                                    not_fail = False
-                                except Exception:
+                                        goalkeeper_sw.saves_per_game_list = []
+                                        goalkeeper_sw.num_saves = total_saves
+                                        not_fail = False
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_penalty = browser.find_element_by_id('stat-6_penalty_success')
                                     actions = ActionChains(browser)
@@ -837,20 +829,20 @@ if __name__ == "__main__":
                                         EC.element_to_be_clickable((By.ID, "the-graph-penalty_success")))
                                     soup_penalties_map = BeautifulSoup(browser.page_source, "html.parser")
 
-                                    num_penalties = soup_goals_conceed.find('div', {'id': 'the-graph-penalty_success'})
+                                    num_penalties = soup_penalties_map.find('div', {'id': 'the-graph-penalty_success'})
                                     num_penalties = num_penalties.find('p', {'id': 'dp-goalmouth-text2'})
                                     num_penalties = num_penalties.findAll('span')
 
                                     goalkeeper_sw.saves_position_list = []
                                     goalkeeper_sw.penalties_conceded = int(num_penalties[0].text)
-                                    goalkeeper_sw.penalties_saved = (num_penalties[1].text)
+                                    goalkeeper_sw.penalties_saved = num_penalties[1].text
                                     goalkeeper_sw.penalties_list = []
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_penalty = browser.find_element_by_id('stat-7')
                                     actions = ActionChains(browser)
@@ -865,27 +857,29 @@ if __name__ == "__main__":
                                     goalkeeper_sw.avg_saves_per_goal = float(
                                         browser.find_element_by_id('stat-7').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML"))
+                                    if goalkeeper_sw.avg_saves_per_goal <= 0.0:
+                                        not_fail = False
+                                    else:
+                                        saves_goal = soup_saves_goal.find('div', {'id': 'the-graph-7'})
+                                        saves_goal = saves_goal.find('div', {'aria-label': constants.ARIAL_LABEL})
+                                        saves_goal = saves_goal.find('tbody')
+                                        saves_goal = saves_goal.findAll('tr')
 
-                                    saves_goal = soup_saves_goal.find('div', {'id': 'the-graph-7'})
-                                    saves_goal = saves_goal.find('div', {'aria-label': constants.ARIAL_LABEL})
-                                    saves_goal = saves_goal.find('tbody')
-                                    saves_goal = saves_goal.findAll('tr')
+                                        total_saves = 0
+                                        for saves_con in range(len(saves_goal)):
+                                            date = saves_goal[saves_con].findAll('td')[0].text
+                                            saves = float(saves_goal[saves_con].findAll('td')[1].text)
+                                            total_saves = total_saves + saves
+                                            goalkeeper_sw.saves_per_goal_list.append([date, saves])
 
-                                    total_saves = 0
-                                    for saves_con in range(len(saves_goal)):
-                                        date = saves_goal[saves_con].findAll('td')[0].text
-                                        saves = float(saves_goal[saves_con].findAll('td')[1].text)
-                                        total_saves = total_saves + saves
-                                        goalkeeper_sw.saves_per_goal_list.append([date, saves])
-
-                                    goalkeeper_sw.total_saves_goal = total_saves
-                                    not_fail = False
-                                except Exception:
+                                        goalkeeper_sw.total_saves_goal = total_saves
+                                        not_fail = False
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_claim = browser.find_element_by_id('stat-8')
                                     actions = ActionChains(browser)
@@ -900,7 +894,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.avg_claims_success = float(
                                         browser.find_element_by_id('stat-8').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML").split('%')[0])
-
+                                    if goalkeeper_sw.avg_claims_success <= 0.0:
+                                        not_fail = False
                                     claims_succ = soup_claim_succ.find('div', {'id': 'the-graph-8-type'})
                                     claims_succ = claims_succ.find('div', {'aria-label': constants.ARIAL_LABEL})
                                     claims_succ = claims_succ.find('tbody')
@@ -921,12 +916,12 @@ if __name__ == "__main__":
                                     goalkeeper_sw.tot_claims_success = total_succ
                                     goalkeeper_sw.tot_claims_fail = total_unsucc
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_punch = browser.find_element_by_id('stat-9')
                                     actions = ActionChains(browser)
@@ -941,7 +936,8 @@ if __name__ == "__main__":
                                     goalkeeper_sw.avg_punches = float(
                                         browser.find_element_by_id('stat-9').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML").split('%')[0])
-
+                                    if goalkeeper_sw.avg_punches <= 0.0:
+                                        not_fail = False
                                     avg_punches_m = soup_punches.find('div', {'id': 'the-graph-9-type'})
                                     avg_punches_m = avg_punches_m.find('div',
                                                                        {'aria-label': constants.ARIAL_LABEL})
@@ -969,12 +965,12 @@ if __name__ == "__main__":
                                         browser.find_element_by_id('stat-10').find_element_by_class_name(
                                             'stat').get_attribute("innerHTML").split('%')[0])
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_dist_success = browser.find_element_by_id('stat-10')
                                     actions = ActionChains(browser)
@@ -1000,7 +996,7 @@ if __name__ == "__main__":
                                     goalkeeper_sw.succ_other = int(dist_succ[4].text)
                                     goalkeeper_sw.unsucc_other = int(dist_succ[9].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
@@ -1055,12 +1051,12 @@ if __name__ == "__main__":
 
                                     goalkeeper_sw.tot_red_card = int(cards_list[1])
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
                             not_fail = True
-                            while (not_fail):
+                            while not_fail:
                                 try:
                                     menu_chance = browser.find_element_by_id('stat-12_red_cards')
                                     actions = ActionChains(browser)
@@ -1084,10 +1080,11 @@ if __name__ == "__main__":
                                     goalkeeper_sw.verb_red_card = int(red_card_lt[3].text)
                                     goalkeeper_sw.oth_red_card = int(red_card_lt[4].text)
                                     not_fail = False
-                                except Exception:
+                                except Exception:  # noqa
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
-                            write = str(goalkeeper_sw.name.encode('utf-8')) + ',' + str(goalkeeper_sw.position_sw) + ',' + str(
+                            write = str(goalkeeper_sw.name.encode('utf-8')) + ',' + str(
+                                goalkeeper_sw.position_sw) + ',' + str(
                                 goalkeeper_sw.team.encode('utf-8')) + ',' + str(goalkeeper_sw.age) + ',' + str(
                                 goalkeeper_sw.height) + ',' + str(goalkeeper_sw.weight) + ',' + str(
                                 goalkeeper_sw.year) + ','
@@ -1108,10 +1105,10 @@ if __name__ == "__main__":
                             write = write + str(goalkeeper_sw.num_saves2) + ',' + str(
                                 goalkeeper_sw.penalties_conceded) + ',' + str(goalkeeper_sw.penalties_saved) + ','
 
-                            write = write + str(goalkeeper_sw.avg_saves_per_goal) + ',' + str(
-                                goalkeeper_sw.total_saves_goal) + ',' + str(
-                                goalkeeper_sw.avg_claims_success) + ',' + str(
-                                goalkeeper_sw.tot_claims_success) + ','
+                            write = '{0}{1},{2},{3},{4},'.format(write, str(goalkeeper_sw.avg_saves_per_goal), str(
+                                goalkeeper_sw.total_saves_goal), str(
+                                goalkeeper_sw.avg_claims_success), str(
+                                goalkeeper_sw.tot_claims_success))
                             write = write + str(goalkeeper_sw.tot_claims_fail) + ',' + str(
                                 goalkeeper_sw.avg_punches) + ',' + str(goalkeeper_sw.tot_punches_success) + ',' + str(
                                 goalkeeper_sw.tot_punches_fail) + ','
