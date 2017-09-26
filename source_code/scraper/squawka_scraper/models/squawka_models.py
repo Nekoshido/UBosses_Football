@@ -3,7 +3,7 @@
 
 class Player(object):
     def __init__(self):
-        """
+        """Player model class
 
         :rtype: object
         """

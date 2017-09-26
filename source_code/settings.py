@@ -20,4 +20,3 @@ print('Trying to open with extension')
 if platform.system() != 'Windows':
     FFPROFILE.add_extension(extension='../resources/firefox/plugins/addblock/addblock.xpi')
     print('Finished load extension')
-

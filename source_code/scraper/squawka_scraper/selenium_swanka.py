@@ -14,13 +14,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from source_code.scraper.squawka_scraper.models import squawka_models, constants
+from source_code.scraper.squawka_scraper.models import constants
+from source_code.scraper.squawka_scraper.models import squawka_models
 from source_code import settings
 
 if __name__ == "__main__":
     try:
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE, executable_path=settings.EXECUTABLE)
-    except:
+    except Exception:
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
     for num_season in range(len(constants.YEARS)):  # noqa
         season = constants.YEARS[num_season]
@@ -64,13 +65,15 @@ if __name__ == "__main__":
                 name = player.find('span', {'class': 'name'}).text
                 position = player.find('span', {'class': 'position'}).text
                 player_link = player.get('href')
-                pla_app_link = f'{player_link}#total-appearances#{team_name}#{constants.LEAGUE_URL}#{constants.LEAGUE_INDEX_NUM}#season-{season.replace("-", "/")}#{constants.SEASON_INDEX_LIST[ num_season]}#all-matches#1-{str(len(teams)- 2)}#by-match'
+                pla_app_link = (f'{player_link}#total-appearances#{team_name}#{constants.LEAGUE_URL}#'
+                                f'{constants.LEAGUE_INDEX_NUM}#season-{season.replace("-", "/")}#'
+                                f'{constants.SEASON_INDEX_LIST[ num_season]}#'
+                                f'all-matches#1-{str(len(teams)- 2)}#by-match')
 
                 try:
                     browser.get(pla_app_link)
                     can_Load = True
-
-                except Exception: # noqa
+                except Exception:  # noqa
                     print("Cannot access: " + pla_app_link)
                     can_Load = False
 
@@ -113,7 +116,7 @@ if __name__ == "__main__":
                             season_name = 'Season ' + season.replace('-', '/')
                             browser.implicitly_wait(constants.DELAY0)
                             time.sleep(constants.DELAY0)
-                            # TODO Hector: Check season bug, player has not this season
+                            # TODO(Hector): Check season bug, player has not this season
                             select = Select(browser.find_element_by_id('season')).select_by_visible_text(season_name)
                             menu_goal = browser.find_element_by_id('stat-1')
                             actions = ActionChains(browser)
@@ -576,17 +579,26 @@ if __name__ == "__main__":
                                     browser.implicitly_wait(constants.DELAY1)
                                     time.sleep(constants.DELAY1)
 
-                            write = '{0},{1},{2},{3},{4},{5},{6},'.format(str(player_sw.name.encode('utf-8')),
-                                                                          str(player_sw.position_sw), str(
-                                    player_sw.team.encode('utf-8')), str(player_sw.age), str(
-                                    player_sw.height), str(player_sw.weight), str(player_sw.year))
+                            write = '{0},{1},{2},{3},{4},{5},{6},'.format(
+                                str(player_sw.name.encode('utf-8')),
+                                str(player_sw.position_sw),
+                                str(player_sw.team.encode('utf-8')),
+                                str(player_sw.age),
+                                str(player_sw.height),
+                                str(player_sw.weight),
+                                str(player_sw.year)
+                            )
 
                             write = write + str(player_sw.app_tot) + ',' + str(player_sw.app_full) + ',' + str(
                                 player_sw.app_sub_on) + ',' + str(player_sw.app_sub_off) + ','
-                            write = '{0}{1},{2},{3},{4},{5},'.format(write, str(player_sw.goal_tot),
-                                                                     str(player_sw.goal_right), str(
-                                    player_sw.goal_left), str(player_sw.goal_head), str(
-                                    player_sw.goal_other))
+                            write = '{0}{1},{2},{3},{4},{5},'.format(
+                                write,
+                                str(player_sw.goal_tot),
+                                str(player_sw.goal_right),
+                                str(player_sw.goal_left),
+                                str(player_sw.goal_head),
+                                str(player_sw.goal_other)
+                            )
                             write = write + str(player_sw.shot_acc) + ',' + str(player_sw.shot_on) + ',' + str(
                                 player_sw.shot_off) + ',' + str(player_sw.shot_block) + ',' + str(
                                 player_sw.shot_conv) + ',' + str(player_sw.shot_fail) + ','
