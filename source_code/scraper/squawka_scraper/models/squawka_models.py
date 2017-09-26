@@ -3,39 +3,37 @@
 
 class Player(object):
     def __init__(self):
+        """Player model class
+
+        :rtype: object
+        """
         self.name = ''
         self.ID = 0
         self.position_sw = ''
         self.position_trnfmrkt = ''
         self.team = ''
-
         self.age = ''
         self.height = ''
         self.weight = ''
         self.year = ''
-
         self.swn_score = ''
         self.swn_score_list = []
-
         self.app_tot = ''
         self.app_full = ''
         self.app_sub_on = ''
         self.app_sub_off = ''
-
         self.goals = []
         self.goal_tot = 0
         self.goal_right = 0
         self.goal_left = 0
         self.goal_head = 0
         self.goal_other = 0
-
         self.shot_acc = 0
         self.shot_on = 0
         self.shot_off = 0
         self.shot_block = 0
         self.shot_conv = 0
         self.shot_fail = 0
-
         self.tt_chances_created = 0
         self.assist = 0
         self.key_passes = 0
@@ -192,6 +190,7 @@ class Goalkeeper(object):
         self.verb_red_card = 0
         self.oth_red_card = 0
 
+    @property
     def __unicode__(self):
         string = 'Name: ' + self.name + '\n'
         string = string + 'Appearance: ' + str(self.app_tot) + '\n'
@@ -205,3 +204,54 @@ class Goalkeeper(object):
         string = string + 'Dist Length: ' + str(self.dis_length) + '\n'
         string = string + 'Yellow/Red Cards: ' + str(self.tot_yel_card) + '/' + str(self.tot_red_card) + '\n'
         return string
+
+
+class Stadium(object):
+    def __init__(self):
+        self.name = ''
+        self.spectators = 0
+        self.length = 0
+        self.width = 0
+        self.year = 0
+
+
+class Team(object):
+    def __init__(self):
+        self.name = ''
+        self.year = 0
+        self.ID = 0
+        self.matches_played = 0
+        self.league = ''
+        self.stadium = ''
+        self.location = ''
+
+        self.goals_scored = 0
+        self.goals_s_high_left = 0
+        self.goals_s_high_center = 0
+        self.goals_s_high_right = 0
+        self.goals_s_low_left = 0
+        self.goals_s_low_center = 0
+        self.goals_s_low_right = 0
+        self.goal_s_right = 0
+        self.goal_s__left = 0
+        self.goal_s__head = 0
+        self.goal_s__other = 0
+
+        self.goals_conceed = 0
+        self.goals_c_high_left = 0
+        self.goals_c_high_center = 0
+        self.goals_c_high_right = 0
+        self.goals_c_low_left = 0
+        self.goals_c_low_center = 0
+        self.goals_c_low_right = 0
+        self.goal_c_right = 0
+        self.goal_c__left = 0
+        self.goal_c__head = 0
+        self.goal_c__other = 0
+
+        self.set_piece_goals = 0
+        self.spg_crossed_free_kicks = 0
+        self.spg_direct_free_kicks = 0
+        self.spg_corners = 0
+        self.spg_throw_ins = 0
+        self.spg_penalties = 0
