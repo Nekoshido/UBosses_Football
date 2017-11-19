@@ -1,0 +1,29 @@
+# Run it using: $ docker-compose up
+
+version: "3"
+
+services:
+
+  python:
+    restart: always
+    build: ./
+    networks:
+      - UBosses_Football
+    volumes:
+      - ./:/usr/app/src
+    stdin_open: true
+    tty: true
+
+  firefox:
+    restart: always
+    image: selenium/standalone-firefox
+    networks:
+      - UBosses_Football
+    stdin_open: true
+    tty: true
+    ports:
+      - 4444
+
+networks:
+  UBosses_Football:
+    driver: bridge
