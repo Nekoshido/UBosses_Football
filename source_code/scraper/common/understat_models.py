@@ -20,7 +20,7 @@ class Performance(object):
         self.xG90 = None
         self.xA90 = None
         self.xAKP = None
-        self.ShxG = None
+        self.xGSh = None
 
     @property
     def __unicode__(self):
@@ -40,6 +40,29 @@ class Performance(object):
         string = string + 'ShxG: ' + str(self.ShxG) + '\n'
         return string
 
+
+class TeamPerformance(object):
+    def __init__(self):
+        """Player model class
+
+        :rtype: object
+        """
+        self.min = 0
+        self.shots = 0
+        self.goals = 0
+        self.shotsAgainst = None
+        self.goalsAgainst = None
+        self.xG = None
+        self.xGA = None
+        self.xGD = None
+        self.xGSh = None
+        self.xGASh = None
+        self.xG90 = None
+        self.xGA90 = None
+        self.xGASh = None
+        self.xGSh = None
+
+
 class Player(object):
     def __init__(self):
         self.name = ''
@@ -48,19 +71,20 @@ class Player(object):
         self.team = ''
         self.general = None
         self.performance_by_position = {}
-        self.performance_by_situation = []
-        self.performance_by_shot_zones = []
-        self.performance_by_shot_types = []
+        self.performance_by_situation = {}
+        self.performance_by_shot_zones = {}
+        self.performance_by_shot_types = {}
 
 
 class Team(object):
     def __init__(self):
         self.name = ''
         self.ID = 0
-        self.situation = []
-        self.formation = []
-        self.game_state = []
-        self.timing = []
-        self.shot_zones = []
-        self.attack_speed = []
-        self.result = []
+        self.season = 0
+        self.performance_by_situation = {}
+        self.performance_by_formation = {}
+        self.performance_by_game_state = {}
+        self.performance_by_timing = {}
+        self.performance_by_shot_zones = {}
+        self.performance_by_attack_speed = {}
+        self.performance_by_result = {}

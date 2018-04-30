@@ -16,3 +16,11 @@ SEASON_TEXT = SEASONS[YEARS_INDEX]
 
 ORIGINAL_UNDERSTAT_URL = 'https://understat.com/'
 UNDERSTAT_URL = ORIGINAL_UNDERSTAT_URL + 'league/' + LEAGUE_TEXT + '/' + YEAR_TEXT
+
+PLAYERS_WRITE = ('Name, Season, Team, General Performance, Performance by Position, Performance by Situation,'
+                 ' Performance by Shot Zones, Performance by Shot Types\n')
+
+TEAMS_WRITE = ('Name, Season, Team, Performance by Situation, Performance by Formation, Performance by Game State, '
+               'Performance by Timing, Performance by Shot Zones, Performance by Attack Speed, '
+               'Performance by Result\n')
+
