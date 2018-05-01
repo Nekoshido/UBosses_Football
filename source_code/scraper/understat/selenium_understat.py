@@ -1,6 +1,5 @@
 import time
 
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -22,7 +21,7 @@ if __name__ == "__main__":
     soup = BeautifulSoup(page, "html.parser")
     teams = soup.find('div', {'id': 'league-chemp'}).find('tbody').find_all('a')
     for team in teams:
-        #team = teams[constants_understat.TEAM_INDEX]
+        # team = teams[constants_understat.TEAM_INDEX]
         team_link = constants_understat.ORIGINAL_UNDERSTAT_URL + team.get('href')
         browser.get(team_link)
         soup = BeautifulSoup(browser.page_source, "html.parser")
@@ -31,7 +30,8 @@ if __name__ == "__main__":
         team_name = soup.find('ul', {'class': 'breadcrumb'}).find_all('li')[2].text
         new_team.name = team_name
         new_team.season = constants_understat.YEAR_TEXT
-        competition_file_name = '%s -%s - %s.csv' % (constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT, team_name)
+        competition_file_name = '%s -%s - %s.csv' % (
+        constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT, team_name)
         league_file = open(competition_file_name, 'w')
         league_file.write(constants_understat.TEAMS_WRITE)
         players_file_name = 'data/%s- %s - Players-%s.csv' % (
@@ -51,7 +51,9 @@ if __name__ == "__main__":
             situation_performance.xGD = situation_stats[8].text
             situation_performance.xGSh = situation_stats[9].text
             situation_performance.xGASh = situation_stats[10].text
-            new_team.performance_by_situation[situation_stats[1].text] = situation_performance.__dict__
+            new_team.performance_by_situation[situation_stats[1].text] = {k: v for k, v in
+                                                                          situation_performance.__dict__.items() if
+                                                                          v is not None}
         xpath = "// label[ @for = 'statistic-2']"
         menu_formation = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -73,7 +75,9 @@ if __name__ == "__main__":
             formation_performance.xGD = formation_stats[9].text
             formation_performance.xG90 = formation_stats[10].text
             formation_performance.xGA90 = formation_stats[11].text
-            new_team.performance_by_formation[formation_stats[1].text] = formation_performance.__dict__
+            new_team.performance_by_formation[formation_stats[1].text] = {k: v for k, v in
+                                                                          formation_performance.__dict__.items() if
+                                                                          v is not None}
         xpath = "// label[ @for = 'statistic-3']"
         menu_game_state = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -95,7 +99,9 @@ if __name__ == "__main__":
             game_state_performance.xGD = game_state_stats[9].text
             game_state_performance.xG90 = game_state_stats[10].text
             game_state_performance.xGA90 = game_state_stats[11].text
-            new_team.performance_by_game_state[game_state_stats[1].text] = game_state_performance.__dict__
+            new_team.performance_by_game_state[game_state_stats[1].text] = {k: v for k, v in
+                                                                            game_state_performance.__dict__.items() if
+                                                                            v is not None}
         xpath = "// label[ @for = 'statistic-4']"
         menu_timing = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -116,7 +122,8 @@ if __name__ == "__main__":
             timing_performance.xGD = timing_stats[8].text
             timing_performance.xGSh = timing_stats[9].text
             timing_performance.xGASh = timing_stats[10].text
-            new_team.performance_by_timing[timing_stats[1].text] = timing_performance.__dict__
+            new_team.performance_by_timing[timing_stats[1].text] = {k: v for k, v in timing_performance.__dict__.items()
+                                                                    if v is not None}
         xpath = "// label[ @for = 'statistic-5']"
         menu_shot_zones = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -137,7 +144,9 @@ if __name__ == "__main__":
             shot_zone_performance.xGD = shot_zone_stats[8].text
             shot_zone_performance.xGSh = shot_zone_stats[9].text
             shot_zone_performance.xGASh = shot_zone_stats[10].text
-            new_team.performance_by_shot_zones[shot_zone_stats[1].text] = shot_zone_performance.__dict__
+            new_team.performance_by_shot_zones[shot_zone_stats[1].text] = {k: v for k, v in
+                                                                           shot_zone_performance.__dict__.items() if
+                                                                           v is not None}
         xpath = "// label[ @for = 'statistic-6']"
         menu_attack_speed = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -158,7 +167,9 @@ if __name__ == "__main__":
             attack_speed_performance.xGD = attack_speed_stats[8].text
             attack_speed_performance.xGSh = attack_speed_stats[9].text
             attack_speed_performance.xGASh = attack_speed_stats[10].text
-            new_team.performance_by_attack_speed[attack_speed_stats[1].text] = attack_speed_performance.__dict__
+            new_team.performance_by_attack_speed[attack_speed_stats[1].text] = {k: v for k, v in
+                                                                                attack_speed_performance.__dict__.items()
+                                                                                if v is not None}
         xpath = "// label[ @for = 'statistic-7']"
         menu_result = browser.find_element_by_xpath(xpath)
         actions = ActionChains(browser)
@@ -179,7 +190,8 @@ if __name__ == "__main__":
             result_performance.xGD = result_stats[8].text
             result_performance.xGSh = result_stats[9].text
             result_performance.xGASh = result_stats[10].text
-            new_team.performance_by_result[result_stats[1].text] = result_performance.__dict__
+            new_team.performance_by_result[result_stats[1].text] = {k: v for k, v in result_performance.__dict__.items()
+                                                                    if v is not None}
         write = '{0},{1},{2},{3},{4},{5},{6},{7},{8}\n'.format(
             str(new_team.name),
             str(new_team.season),
@@ -219,7 +231,7 @@ if __name__ == "__main__":
                     season_performance.xA = season_stats[10].text.split('+')[0].split('-')[0]
                     season_performance.xG90 = season_stats[11].text
                     season_performance.xA90 = season_stats[12].text
-                    new_player.general = season_performance.__dict__
+                    new_player.general = {k: v for k, v in season_performance.__dict__.items() if v is not None}
                     xpath = "// label[ @for = 'groups-field-2']"
                     menu_position = browser.find_element_by_xpath(xpath)
                     actions = ActionChains(browser)
@@ -231,7 +243,7 @@ if __name__ == "__main__":
                     actions.move_to_element(select_drop_year)
                     actions.click(select_drop_year)
                     actions.perform()
-                    select_season = browser.find_elements_by_class_name("custom-select-options")[1].\
+                    select_season = browser.find_elements_by_class_name("custom-select-options")[1]. \
                         find_elements_by_css_selector("li")
                     new_season = select_season[0]
                     for seas in select_season:
@@ -256,7 +268,9 @@ if __name__ == "__main__":
                         position_performance.xA = position_stats[9].text.split('+')[0].split('-')[0]
                         position_performance.xG90 = position_stats[10].text
                         position_performance.xA90 = position_stats[11].text
-                        new_player.performance_by_position[position_stats[1].text] = position_performance.__dict__
+                        new_player.performance_by_position[position_stats[1].text] = {k: v for k, v in
+                                                                                      position_performance.__dict__.items()
+                                                                                      if v is not None}
                     xpath = "// label[ @for = 'groups-field-3']"
                     menu_situation = browser.find_element_by_xpath(xpath)
                     actions = ActionChains(browser)
@@ -278,7 +292,9 @@ if __name__ == "__main__":
                         situation_performance.xA90 = situation_stats[9].text
                         situation_performance.xGSh = situation_stats[10].text
                         situation_performance.xAKP = situation_stats[11].text
-                        new_player.performance_by_situation[situation_stats[1].text] = situation_performance.__dict__
+                        new_player.performance_by_situation[situation_stats[1].text] = {k: v for k, v in
+                                                                                        situation_performance.__dict__.items()
+                                                                                        if v is not None}
                     xpath = "// label[ @for = 'groups-field-4']"
                     menu_shot_zones = browser.find_element_by_xpath(xpath)
                     actions = ActionChains(browser)
@@ -298,7 +314,9 @@ if __name__ == "__main__":
                         shot_zone_performance.xA = shot_zone_stats[7].text.split('+')[0].split('-')[0]
                         shot_zone_performance.xGSh = shot_zone_stats[8].text
                         shot_zone_performance.xAKP = shot_zone_stats[9].text
-                        new_player.performance_by_shot_zones[shot_zone_stats[1].text] = shot_zone_performance.__dict__
+                        new_player.performance_by_shot_zones[shot_zone_stats[1].text] = {k: v for k, v in
+                                                                                         shot_zone_performance.__dict__.items()
+                                                                                         if v is not None}
                     xpath = "// label[ @for = 'groups-field-5']"
                     menu_shot_types = browser.find_element_by_xpath(xpath)
                     actions = ActionChains(browser)
@@ -318,7 +336,9 @@ if __name__ == "__main__":
                         shot_type_performance.xA = shot_type_stats[7].text.split('+')[0].split('-')[0]
                         shot_type_performance.xGSh = shot_type_stats[8].text
                         shot_type_performance.xAKP = shot_type_stats[9].text
-                        new_player.performance_by_shot_types[shot_type_stats[1].text] = shot_type_performance.__dict__
+                        new_player.performance_by_shot_types[shot_type_stats[1].text] = {k: v for k, v in
+                                                                                         shot_type_performance.__dict__.items()
+                                                                                         if v is not None}
                     enter = False
                     write = '{0},{1},{2},{3},{4},{5},{6},{7}\n'.format(
                         json.dumps(new_player.name),
