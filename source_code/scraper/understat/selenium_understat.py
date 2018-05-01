@@ -38,7 +38,9 @@ if __name__ == "__main__":
             team_name, constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT)
         players_file = open(players_file_name, 'w')
         players_file.write(constants_understat.PLAYERS_WRITE)
+        print("=================")
         print(team_name)
+        print("=================")
         for situation in situations:
             situation_stats = situation.find_all('td')
             situation_performance = understat_models.TeamPerformance()
