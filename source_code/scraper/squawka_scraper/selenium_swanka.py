@@ -693,6 +693,7 @@ if __name__ == "__main__":
                         f'{constants.SEASON_INDEX_LIST[constants.YEARS_INDEX]}#'
                         f'all-matches#1-{str(len(teams)- 2)}#by-match')
         try:
+
             browser.get(pla_app_link)
             can_Load = True
         except Exception:  # noqa
