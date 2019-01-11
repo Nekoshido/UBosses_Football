@@ -4,6 +4,7 @@ import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 import json
 from source_code.scraper.common import understat_models
 from source_code.scraper.understat.models import constants_understat
@@ -18,6 +19,9 @@ if __name__ == "__main__":
     site = constants_understat.UNDERSTAT_URL
     print(site)
     browser.get(site)
+    #browser.execute_script("document.body.style.zoom='50%'")
+    #browser.execute_script('document.body.style.MozTransform = "scale(0.50)";')
+    #browser.execute_script('document.body.style.MozTransformOrigin = "0 0";')
     page = browser.page_source
     soup = BeautifulSoup(page, "html.parser")
     teams = soup.find('div', {'id': 'league-chemp'}).find('tbody').find_all('a')
@@ -31,13 +35,13 @@ if __name__ == "__main__":
         team_name = soup.find('ul', {'class': 'breadcrumb'}).find_all('li')[2].text
         new_team.name = team_name
         new_team.season = constants_understat.YEAR_TEXT
-        competition_file_name = '%s -%s - %s.csv' % (constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT, team_name)
+        competition_file_name = '%s -%s - %s.json' % (constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT, team_name)
         league_file = open(competition_file_name, 'w')
-        league_file.write(constants_understat.TEAMS_WRITE)
-        players_file_name = 'data/%s- %s - Players-%s.csv' % (
+        #league_file.write(constants_understat.TEAMS_WRITE)
+        players_file_name = 'data/%s- %s - Players-%s.json' % (
             team_name, constants_understat.LEAGUE_TEXT, constants_understat.YEAR_TEXT)
         players_file = open(players_file_name, 'w')
-        players_file.write(constants_understat.PLAYERS_WRITE)
+        #players_file.write(constants_understat.PLAYERS_WRITE)
         print(team_name)
         for situation in situations:
             situation_stats = situation.find_all('td')
@@ -180,20 +184,22 @@ if __name__ == "__main__":
             result_performance.xGSh = result_stats[9].text
             result_performance.xGASh = result_stats[10].text
             new_team.performance_by_result[result_stats[1].text] = result_performance.__dict__
-        write = '{0},{1},{2},{3},{4},{5},{6},{7},{8}\n'.format(
-            str(new_team.name),
-            str(new_team.season),
-            json.dumps(new_team.performance_by_situation),
-            json.dumps(new_team.performance_by_formation),
-            json.dumps(new_team.performance_by_game_state),
-            json.dumps(new_team.performance_by_timing),
-            json.dumps(new_team.performance_by_shot_zones),
-            json.dumps(new_team.performance_by_attack_speed),
-            json.dumps(new_team.performance_by_result)
+        dict_to_write = {"team": str(new_team.name),
+                         "season": str(new_team.season),
+                         "situation": new_team.performance_by_situation,
+                         "formation": new_team.performance_by_formation,
+                         "game_state": new_team.performance_by_game_state,
+                         "timing": new_team.performance_by_timing,
+                         "shot_zones": new_team.performance_by_shot_zones,
+                         "attack_speed": new_team.performance_by_attack_speed,
+                         "result": new_team.performance_by_result,
+                         }
+        write = '{0}'.format(
+            json.dumps(dict_to_write, indent=4, separators=(',', ': '))
         )
         league_file.write(write)
         players = soup.find('div', {'id': 'team-players'}).find('tbody').find_all('tr')
-        for player in players:
+        for idx, player in enumerate(players):
             player_link = constants_understat.ORIGINAL_UNDERSTAT_URL + player.find_all('td')[1].find('a').get('href')
             browser.get(player_link)
             soup = BeautifulSoup(browser.page_source, "html.parser")
@@ -320,16 +326,24 @@ if __name__ == "__main__":
                         shot_type_performance.xAKP = shot_type_stats[9].text
                         new_player.performance_by_shot_types[shot_type_stats[1].text] = shot_type_performance.__dict__
                     enter = False
-                    write = '{0},{1},{2},{3},{4},{5},{6},{7}\n'.format(
-                        json.dumps(new_player.name),
-                        json.dumps(new_player.season),
-                        json.dumps(new_player.team),
-                        json.dumps(new_player.general),
-                        json.dumps(new_player.performance_by_position),
-                        json.dumps(new_player.performance_by_situation),
-                        json.dumps(new_player.performance_by_shot_zones),
-                        json.dumps(new_player.performance_by_shot_types)
-                    )
+
+                    player_to_write = {"name": str(new_player.name),
+                                     "season": str(new_player.season),
+                                     "team": new_player.team,
+                                     "general": new_player.general,
+                                     "performance_by_position": new_player.performance_by_position,
+                                     "performance_by_situation": new_player.performance_by_situation,
+                                     "performance_by_shot_zones": new_player.performance_by_shot_zones,
+                                     "performance_by_shot_types": new_player.performance_by_shot_types,
+                                     }
+                    write = '{0}'.format(
+                        json.dumps(player_to_write, indent=4, separators=(',', ': ')))
+                    if idx == 0:
+                        write = "[" + write + ","
+                    elif idx == (len(players)-1):
+                        write = write + "]"
+                    else:
+                        write = write + ","
                     players_file.write(write)
         players_file.close()
         league_file.close()
