@@ -7,10 +7,10 @@ class Performance(object):
 
         :rtype: object
         """
-        self.apps = 0
-        self.min = 0
-        self.goals = 0
-        self.assist = 0
+        self.apps = None
+        self.min = None
+        self.goals = None
+        self.assist = None
         self.shots = None
         self.KP = None
         self.sh90 = None
@@ -47,9 +47,9 @@ class TeamPerformance(object):
 
         :rtype: object
         """
-        self.min = 0
-        self.shots = 0
-        self.goals = 0
+        self.min = None
+        self.shots = None
+        self.goals = None
         self.shotsAgainst = None
         self.goalsAgainst = None
         self.xG = None
