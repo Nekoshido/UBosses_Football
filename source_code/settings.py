@@ -7,7 +7,7 @@ from selenium import webdriver
 
 # under different operating systems
 if platform.system() == 'Windows':
-    EXECUTABLE = '../resources/firefox/firefox_driver/win/geckodriver.exe'
+    EXECUTABLE = '/Users/Hecto/PycharmProjects/UBosses_Football/resources/firefox/firefox_driver/win/geckodriver.exe'
 elif platform.system() == 'Darwin':
     EXECUTABLE = '/Users/hector.vivancos/PycharmProjects/UBosses_Football/resources/firefox/firefox_driver/mac/geckodriver'
 else:
