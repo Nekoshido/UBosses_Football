@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from source_code.scraper.transfermarkt.models import constants
+from source_code.scraper.transfermarkt.models import constants_transfermarkt
 from source_code.scraper.common import transfermarkt_models
 from source_code import settings
 
@@ -18,9 +18,9 @@ if __name__ == "__main__":
     except Exception:
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
 
-    season = constants.YEARS[constants.YEARS_INDEX]
-    site = '{}/x/profil/spieler/{}'.format(constants.TRANSFERMARKT_URL,constants.PLAYER_INDEX
-                                                                     )
+    season = constants_transfermarkt.YEARS[constants_transfermarkt.YEARS_INDEX]
+    site = '{}/x/profil/spieler/{}'.format(constants_transfermarkt.TRANSFERMARKT_URL, constants_transfermarkt.PLAYER_INDEX
+                                           )
     players_file_name = 'players_transfermarkt.csv'
     players_file = open(players_file_name, 'w')
     #players_file.write(constants.PLAYERS_WRITE)
@@ -28,8 +28,8 @@ if __name__ == "__main__":
     browser.get(site)
     page = browser.page_source
     soup = BeautifulSoup(page, "html.parser")
-    for player_id in range(constants.PLAYER_INDEX+1, 999999):
-        player_page = '{}/x/profil/spieler/{}'.format(constants.TRANSFERMARKT_URL,player_id)
+    for player_id in range(constants_transfermarkt.PLAYER_INDEX + 1, 999999):
+        player_page = '{}/x/profil/spieler/{}'.format(constants_transfermarkt.TRANSFERMARKT_URL, player_id)
         browser.get(player_page)
         soup = BeautifulSoup(browser.page_source, "html.parser")
         player = transfermarkt_models.Player()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                     position_list.append(position.split('\t\t')[0])
                 else:
                     position_list.append(position.split('\t\t')[1])
-        market_link = '{}/x/marktwertverlauf/spieler/{}'.format(constants.TRANSFERMARKT_URL, player_id)
+        market_link = '{}/x/marktwertverlauf/spieler/{}'.format(constants_transfermarkt.TRANSFERMARKT_URL, player_id)
         browser.get(market_link)
         soup = BeautifulSoup(browser.page_source, "html.parser")
         market_price = soup.find('g', {'class': 'highcharts-markers highcharts-tracker'}).find_all('image')

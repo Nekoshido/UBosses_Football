@@ -6,9 +6,44 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from source_code.scraper.transfermarkt.models import constants
+from source_code.scraper.transfermarkt.models import constants_transfermarkt
 from source_code.scraper.common import transfermarkt_models
 from source_code import settings
+
+def string_money_to_int(number):
+    if number == "\xa0":
+        return 0
+    else:
+        units_dic = ['Mill.', 'Th.']
+        money_list = number.split(" ")
+        units = float(money_list[0].replace(",", "."))
+        if money_list[1] == units_dic[0]:
+            return units * 1000000
+        elif money_list[1] == units_dic[1]:
+            return units * 1000
+        else:
+            return money_list[1]
+
+def string_date_to_date(date):
+    calendar = {'Jan': '01',
+                'Feb': '02',
+                'Mar': '03',
+                'Apr': '04',
+                'May': '05',
+                'Jun': '06',
+                'Jul': '07',
+                'Aug': '08',
+                'Sep': '09',
+                'Oct': '10',
+                'Nov': '11',
+                'Dec': '12'}
+    final_date = date.split("(")[0].split(" ")
+    if int(final_date[1].split(',')[0]) < 10:
+        day = '0' + final_date[1].split(',')[0]
+    else:
+        day = final_date[1].split(',')[0]
+    final_date = day + "-" + calendar[final_date[0]] + "-" + final_date[2]
+    return final_date
 
 if __name__ == "__main__":
     try:
@@ -16,11 +51,11 @@ if __name__ == "__main__":
     except Exception:
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
 
-    season = constants.YEARS[constants.YEARS_INDEX]
-    site = '{}/{}/startseite/wettbewerb/{}/plus/?saison_id={}'.format(constants.TRANSFERMARKT_URL,
-                                                                      constants.LEAGUES_LINK[constants.LEAGUE_INDEX],
-                                                                      constants.LEAGUES_SHORT[constants.LEAGUE_INDEX],
-                                                                      constants.YEARS[constants.YEARS_INDEX])
+    season = constants_transfermarkt.YEARS[constants_transfermarkt.YEARS_INDEX]
+    site = '{}/{}/startseite/wettbewerb/{}/plus/?saison_id={}'.format(constants_transfermarkt.TRANSFERMARKT_URL,
+                                                                      constants_transfermarkt.LEAGUES_LINK[constants_transfermarkt.LEAGUE_INDEX],
+                                                                      constants_transfermarkt.LEAGUES_SHORT[constants_transfermarkt.LEAGUE_INDEX],
+                                                                      constants_transfermarkt.YEARS[constants_transfermarkt.YEARS_INDEX])
     print(site)
     browser.get(site)
     page = browser.page_source
@@ -33,10 +68,20 @@ if __name__ == "__main__":
         team_href = team.get('href')
         if team_href not in list_array:
             list_array.append(team_href)
+
     for link in list_array:
-        team_link = '{}{}'.format(constants.TRANSFERMARKT_URL,link)
+        team_link = '{}{}'.format(constants_transfermarkt.TRANSFERMARKT_URL, link)
         browser.get(team_link)
         soup = BeautifulSoup(browser.page_source, "html.parser")
-        team_name = soup.find('h1', {'itemprop': 'name'}).find('b').text
-        print(team_name)
+        players_team_odd = soup.find('div', {'id': 'yw1'}).find('tbody').find_all('tr', {'class': 'odd'})
+        players_team_even = soup.find('div', {'id': 'yw1'}).find('tbody').find_all('tr', {'class': 'even'})
+        new_player_preview = transfermarkt_models.PlayerPreview()
+        for players in players_team_odd:
+            new_player_preview.name = players.find('a', {'class': 'spielprofil_tooltip tooltipstered'}).text
+            new_player_preview.value = string_money_to_int(players.find('td', {'class': 'rechts hauptlink'}).text)
+            new_player_preview.position = players.find('table', {'class': 'inline-table'}).find_all('tr')[1].find('td').text
+            new_player_preview.birth = string_date_to_date(players.find_all('td', {'class': 'zentriert'})[1].text)
+            new_player_preview.number = players.find('div', {'class': 'rn_nummer'}).text
+            new_player_preview.url = players.find('a', {'class': 'spielprofil_tooltip tooltipstered'})['href']
+            new_player_preview.id = players.find('a', {'class': 'spielprofil_tooltip tooltipstered'})['id']
         break
