@@ -44,11 +44,14 @@ class PlayerPreview(object):
         self.position = None
         self.value = None
         self.number = None
+        self.team = None
+        self.season = None
 
     def __str__(self):
         return "Name: " + str(self.name) + "\n" + "Position: " + str(self.position) + "\n" + "Value: " \
                + str(self.value) + "\n" + "Birth: " + str(self.birth) + "\n" + "Url: " + str(self.url) + "\n" \
-               + "Number: " + str(self.number) + "\n" + "ID: " + str(self.id) + "\n"
+               + "Number: " + str(self.number) + "\n" + "ID: " + str(self.id) + "\n" + "Team: " + str(self.team) + "\n"\
+               + "Season: " + str(self.season) + "\n"
 
 class Value(object):
     def __init__(self):
