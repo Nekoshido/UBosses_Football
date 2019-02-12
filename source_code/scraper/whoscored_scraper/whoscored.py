@@ -29,7 +29,7 @@ if __name__ == "__main__":
         browser = webdriver.Firefox(firefox_profile=settings.FFPROFILE)
 
     # try:
-    #     path_to_extension = r'/Users/Hecto/PycharmProjects/UBosses_Football/resources/chrome/plugins/win/adblock.crx'
+    #     path_to_extension = '/Users/Hecto/PycharmProjects/UBosses_Football/resources/chrome/plugins/ublock.crx'
     #
     #     chrome_options = Options()
     #     chrome_options.add_argument('load-extension=' + path_to_extension)
@@ -39,7 +39,6 @@ if __name__ == "__main__":
     #     browser = webdriver.Chrome()
 
 
-
     site = '{}/Regions/{}/Tournaments/{}/Seasons/{}/{}'.format(constants_whoscored.WHOSCORED_URL,
                                                               constants_whoscored.LEAGUES_ID[constants_whoscored.LEAGUE_INDEX],
                                                             constants_whoscored.LEAGUES_NUM[constants_whoscored.LEAGUE_INDEX],
@@ -47,16 +46,17 @@ if __name__ == "__main__":
                                                                constants_whoscored.LEAGUES_LINK[constants_whoscored.LEAGUE_INDEX])
     browser.get(site)
     time.sleep(3)
-    #continue_button = soup.find('a', {'class': 'details_continue--2CnZz'})
-    continue_button = browser.find_element_by_class_name('details_continue--2CnZz')
+    browser.execute_script("document.body.style.zoom = '30%';")
+
+    continue_button = browser.find_element_by_class_name('details_continue--2CnZz').find_element_by_tag_name('span')
     actions = ActionChains(browser)
     actions.move_to_element(continue_button)
-    actions.click(continue_button)
-    actions.perform()
+    actions.click(continue_button).perform()
     soup = BeautifulSoup(browser.page_source, "html.parser")
     table_teams = soup.find_all('table', {'class': 'grid with-centered-columns hover'})[0].find('tbody')
     teams = table_teams.find_all('tr')
     print("SEASON: " + str(constants_whoscored.SEASON_NUMBER[constants_whoscored.SEASON_INDEX]))
+    print("Len Teams: " + str(len(teams[constants_whoscored.TEAM_INDEX:])))
     for idx, team in enumerate(teams[constants_whoscored.TEAM_INDEX:]):
         print('Progress: ' + str(constants_whoscored.TEAM_INDEX + idx) + ' / ' + str(len(teams)-1))
         url = team.find('a', {'class': 'team-link'}).get('href')
@@ -73,11 +73,19 @@ if __name__ == "__main__":
 
             season_list = [x.text for x in
                            option_list]
-
+            print("Len Seasons: " + str(len(season_list)))
             for idx_c, competition in enumerate(season_list):
                 print("+++++++++")
                 print(competition)
                 print("+++++++++")
+                if idx_c != 0:
+                    summary_button = browser.find_element_by_id('team-squad-stats-options').find_elements_by_tag_name('li')[0]
+                    actions = ActionChains(browser)
+                    actions.move_to_element(summary_button)
+                    actions.click(summary_button)
+                    actions.perform()
+                    time.sleep(2)
+
                 comp_button = browser.find_element_by_id('tournamentOptions').find_elements_by_tag_name('dd')[idx_c]
                 actions = ActionChains(browser)
                 actions.move_to_element(comp_button)
@@ -121,6 +129,7 @@ if __name__ == "__main__":
 
                 player_team = {}
                 start = time.time()
+                print("Len Seasons: " + str(len(player_list)))
                 for player_row in player_list:
                     new_player = whoscored_models.Player()
                     new_player.name = player_row.find('a', {'class': 'player-link'}).text
@@ -194,7 +203,7 @@ if __name__ == "__main__":
                             1].find_elements_by_tag_name('tr')
 
                 for player_row in player_list_defensive:
-                    name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
+                    name = player_row.find_element_by_class_name('player-link').get_attribute("innerText").strip('\t')
                     # index = search_player_in_list(name, player_team)
                     player_team[name].tackles_per_game = player_row.find_elements_by_tag_name("td")[7].get_attribute(
                         "innerHTML").strip('\t')
@@ -252,7 +261,7 @@ if __name__ == "__main__":
                             .find_elements_by_tag_name('tr')
 
                 for player_row in player_list_offensive:
-                    name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
+                    name = player_row.find_element_by_class_name('player-link').get_attribute("innerText").strip('\t')
                     # index = search_player_in_list(name, player_team)
                     player_team[name].key_passes_per_game = player_row.find_elements_by_tag_name("td")[
                         10].get_attribute(
@@ -940,12 +949,14 @@ if __name__ == "__main__":
                          browser.find_element_by_id('past-seasons').find_elements_by_tag_name("option")]
             new_season_list = []
             not_new_seasons = []
+            print("Len Seasons: " + str(len(season_list)))
             for season in season_list:
                 split_season = season.split('-')[1].split(' ')[1].split('/')[0]
                 if split_season == constants_whoscored.SEASON_NUMBER[constants_whoscored.SEASON_INDEX]:
                     new_season_list.append(season)
                 else:
                     not_new_seasons.append(season)
+            print("Len New Seasons: " + str(len(new_season_list)))
             for competition in new_season_list:
                 print("+++++++++")
                 print(competition)
@@ -994,6 +1005,7 @@ if __name__ == "__main__":
 
                 player_team = {}
                 start = time.time()
+                print("Len Player List: " + str(len(player_list)))
                 for player_row in player_list:
                     new_player = whoscored_models.Player()
                     new_player.name = player_row.find('a', {'class': 'player-link'}).text
@@ -1029,7 +1041,7 @@ if __name__ == "__main__":
                 actions.click(defensive_button)
                 actions.perform()
 
-                time.sleep(3)
+                time.sleep(5)
 
                 player_list_defensive = browser.find_elements_by_id("player-table-statistics-body")[1].find_elements_by_tag_name('tr')
                 done = time.time()
@@ -1050,6 +1062,7 @@ if __name__ == "__main__":
                         player_list_defensive = browser.find_elements_by_id("player-table-statistics-body")[
                             1].find_elements_by_tag_name('tr')
 
+                print("Len Player Defensive List: " + str(len(player_list_defensive)))
                 for player_row in player_list_defensive:
                     name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
                     # index = search_player_in_list(name, player_team)
@@ -1104,6 +1117,7 @@ if __name__ == "__main__":
                         player_list_offensive = browser.find_elements_by_id("player-table-statistics-body")[2] \
                             .find_elements_by_tag_name('tr')
 
+                print("Len Player Offensive List: " + str(len(player_list_offensive)))
                 for player_row in player_list_offensive:
                     name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
                     # index = search_player_in_list(name, player_team)
@@ -1143,6 +1157,7 @@ if __name__ == "__main__":
                     player_list_passing = browser.find_elements_by_id("player-table-statistics-body")[3] \
                         .find_elements_by_tag_name('tr')
 
+                print("Len Player Passing List: " + str(len(player_list_passing)))
                 for player_row in player_list_passing:
                     name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
                     # index = search_player_in_list(name, player_team)
@@ -1177,6 +1192,7 @@ if __name__ == "__main__":
                 detail_list = [x.text for x in
                              browser.find_element_by_id('category').find_elements_by_tag_name("option")]
 
+                print("Len Detail List: " + str(len(detail_list)))
                 for detail in detail_list:
                     Select(browser.find_element_by_id('category')).select_by_visible_text(detail)
 
@@ -1225,6 +1241,7 @@ if __name__ == "__main__":
                     if detail == "Tackles":
                         startt = time.time()
 
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1242,6 +1259,7 @@ if __name__ == "__main__":
 
                     elif detail == "Interception":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1255,6 +1273,7 @@ if __name__ == "__main__":
 
                     elif detail == "Fouls":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1272,6 +1291,7 @@ if __name__ == "__main__":
 
                     elif detail == "Cards":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1289,6 +1309,7 @@ if __name__ == "__main__":
 
                     elif detail == "Offsides":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1303,6 +1324,7 @@ if __name__ == "__main__":
 
                     elif detail == "Clearances":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1317,6 +1339,7 @@ if __name__ == "__main__":
 
                     elif detail == "Blocks":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1336,6 +1359,7 @@ if __name__ == "__main__":
 
                     elif detail == "Saves":
                         startt = time.time()
+                        print("Len Detail Player List: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1362,7 +1386,7 @@ if __name__ == "__main__":
                         startt = time.time()
                         shot_list = [x.text for x in
                                        browser.find_element_by_id('subcategory').find_elements_by_tag_name("option")]
-
+                        print("Len Shot List: " + str(len(shot_list)))
                         for shot_detail in shot_list:
                             Select(browser.find_element_by_id('subcategory')).select_by_visible_text(shot_detail)
 
@@ -1371,6 +1395,7 @@ if __name__ == "__main__":
                             player_shot_detailed = browser.find_elements_by_id("player-table-statistics-body")[4] \
                                 .find_elements_by_tag_name('tr')
 
+                            print("Len player_shot_detailed: " + str(len(player_shot_detailed)))
                             for player_row in player_shot_detailed:
                                 name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1435,7 +1460,7 @@ if __name__ == "__main__":
                         startt = time.time()
                         goal_list = [x.text for x in
                                      browser.find_element_by_id('subcategory').find_elements_by_tag_name("option")]
-
+                        print("Len goal_list: " + str(len(goal_list)))
                         for goal_detail in goal_list:
 
                             Select(browser.find_element_by_id('subcategory')).select_by_visible_text(goal_detail)
@@ -1445,6 +1470,7 @@ if __name__ == "__main__":
                             player_goal_detailed = browser.find_elements_by_id("player-table-statistics-body")[4] \
                                 .find_elements_by_tag_name('tr')
 
+                            print("Len player_goal_detailed: " + str(len(player_goal_detailed)))
                             for player_row in player_goal_detailed:
                                 name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1497,6 +1523,7 @@ if __name__ == "__main__":
 
                     elif detail == "Dribbles":
                         startt = time.time()
+                        print("Len player_list_detailed: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1517,6 +1544,7 @@ if __name__ == "__main__":
 
                     elif detail == "Possession loss":
                         startt = time.time()
+                        print("Len player_list_detailed: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1535,6 +1563,7 @@ if __name__ == "__main__":
                     elif detail == "Aerial":
 
                         startt = time.time()
+                        print("Len player_list_detailed: " + str(len(player_list_detailed)))
                         for player_row in player_list_detailed:
                             name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1561,6 +1590,7 @@ if __name__ == "__main__":
                         startt = time.time()
                         pass_list = [x.text for x in
                                      browser.find_element_by_id('subcategory').find_elements_by_tag_name("option")]
+                        print("Len pass_list: " + str(len(pass_list)))
                         for pass_detail in pass_list:
 
                             Select(browser.find_element_by_id('subcategory')).select_by_visible_text(pass_detail)
@@ -1571,7 +1601,7 @@ if __name__ == "__main__":
                                 .find_elements_by_tag_name('tr')
 
                             time.sleep(1)
-
+                            print("Len player_pass_detailed: " + str(len(player_pass_detailed)))
                             for player_row in player_pass_detailed:
                                 name = player_row.find_element_by_class_name('player-link').get_attribute("innerText")
 
@@ -1634,6 +1664,7 @@ if __name__ == "__main__":
                         startt = time.time()
                         key_pass_list = [x.text for x in
                                      browser.find_element_by_id('subcategory').find_elements_by_tag_name("option")]
+                        print("Len key_pass_list: " + str(len(key_pass_list)))
                         for key_pass_detail in key_pass_list:
                             Select(browser.find_element_by_id('subcategory')).select_by_visible_text(key_pass_detail)
 
