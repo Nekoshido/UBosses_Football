@@ -202,6 +202,7 @@ if __name__ == "__main__":
                         player_list_defensive = browser.find_elements_by_id("player-table-statistics-body")[
                             1].find_elements_by_tag_name('tr')
 
+                print(player_team)
                 for player_row in player_list_defensive:
                     name = player_row.find_element_by_class_name('player-link').get_attribute("innerText").strip('\t')
                     # index = search_player_in_list(name, player_team)
