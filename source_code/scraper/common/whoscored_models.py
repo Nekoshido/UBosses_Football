@@ -58,36 +58,57 @@ class Player(object):
         self.long_balls_per_game = None
         self.through_balls_per_game = None
 
-        #detailed [per 90 mins]:
+        #detailed [total]:
         self.total_tackles_won = None
         self.player_gets_dribbled = None
         self.total_tackle_attempts = None
+        self.total_tackles_won_per90 = None
+        self.player_gets_dribbled_per90 = None
+        self.total_tackle_attempts_per90 = None
 
         self.interceptions = None
+        self.interceptions_per90 = None
 
         self.fouled = None
         self.fouls = None
+        self.fouled_per90 = None
+        self.fouls_per90 = None
 
-        self.yellow_cards_per_90 = None
-        self.red_cards_per_90 = None
+        self.total_yellow_cards = None
+        self.total_red_cards = None
+        self.total_yellow_cards_per90 = None
+        self.total_red_cards_per90 = None
 
         self.caught_offside = None
+        self.caught_offside_per90 = None
 
         self.total_clearances = None
+        self.total_clearances_per90 = None
 
         self.blocked_shots = None
         self.blocked_crosses = None
         self.blocked_passes = None
+        self.blocked_shots_per90 = None
+        self.blocked_crosses_per90 = None
+        self.blocked_passes_per90 = None
 
         self.gk_totalsaves = None
         self.gk_saves_insix_yard_box = None
         self.gk_saves_in_penalty_area = None
         self.gk_saves_from_outside_of_the_box = None
+        self.gk_totalsaves_per90 = None
+        self.gk_saves_insix_yard_box_per90 = None
+        self.gk_saves_in_penalty_area_per90 = None
+        self.gk_saves_from_outside_of_the_box_per90 = None
 
-        self.total_shots_per_90 = None
+        self.total_shots = None
         self.shots_from_outside_the_penalty_area = None
         self.shots_from_inside_thesix_yard_box = None
         self.shots_from_inside_the_penalty_area = None #excludingsix yard box
+        self.total_shots_per90 = None
+        self.shots_from_outside_the_penalty_area_per90 = None
+        self.shots_from_inside_thesix_yard_box_per90 = None
+        self.shots_from_inside_the_penalty_area_per90 = None
 
         self.shot_open_play = None
         self.shot_counter = None
@@ -102,10 +123,27 @@ class Player(object):
         self.shot_head = None
         self.shot_other = None
 
-        self.total_goal_per_90 = None
+        self.shot_open_play_per90 = None
+        self.shot_counter_per90 = None
+        self.shot_setpiece_per90 = None
+        self.shot_penalty_taken_per90 = None
+        self.shot_offtarget_per90 = None
+        self.shot_onpost_per90 = None
+        self.shot_ontarget_per90 = None
+        self.shot_blocked_per90 = None
+        self.shot_right_foot_per90 = None
+        self.shot_left_foot_per90 = None
+        self.shot_head_per90 = None
+        self.shot_other_per90 = None
+
+        self.total_goal = None
         self.goals_from_inside_thesix_yard_box = None
         self.goals_from_inside_the_penalty_area = None# excludingsix yard box
         self.goals_from_outside_the_penalty_area = None
+        self.total_goal_per90 = None
+        self.goals_from_inside_thesix_yard_box_per90 = None
+        self.goals_from_inside_the_penalty_area_per90 = None  # excludingsix yard box
+        self.goals_from_outside_the_penalty_area_per90 = None
 
         self.goal_open_play = None
         self.goal_counter = None
@@ -117,23 +155,47 @@ class Player(object):
         self.goal_left_foot = None
         self.goal_head = None
         self.goal_other = None
+        self.goal_open_play_per90 = None
+        self.goal_counter_per90 = None
+        self.goal_setpiece_per90 = None
+        self.goal_penaltyscored_per90 = None
+        self.goal_own_per90 = None
+        self.goal_normal_per90 = None
+        self.goal_right_foot_per90 = None
+        self.goal_left_foot_per90 = None
+        self.goal_head_per90 = None
+        self.goal_other_per90 = None
 
         self.unsuccessful_dribbles = None
         self.successful_dribbles = None
         self.total_dribbles = None
+        self.unsuccessful_dribbles_per90 = None
+        self.successful_dribbles_per90 = None
+        self.total_dribbles_per90 = None
 
         self.unsuccessful_touches = None
-        self.dispossessed_per_90 = None
+        self.total_dispossessed = None
+        self.unsuccessful_touches_per90 = None
+        self.total_dispossessed_per_90 = None
 
         self.total_aerial_duels = None
-        self.aerials_duels_won_per_90 = None
+        self.total_aerials_duels_won = None
         self.aerial_duels_lost = None
+        self.total_aerial_duels_per_90 = None
+        self.total_aerials_duels_won_per_90 = None
+        self.aerial_duels_lost_per_90 = None
+
 
         self.total_passes = None
         self.accurate_long_balls = None
         self.inaccurate_long_balls = None
         self.accurate_short_passes = None
         self.inaccurate_short_passes = None
+        self.total_passes_per_90 = None
+        self.accurate_long_balls_per_90 = None
+        self.inaccurate_long_balls_per_90 = None
+        self.accurate_short_passes_per_90 = None
+        self.inaccurate_short_passes_per_90 = None
 
         self.accurate_cross_passes = None
         self.inaccurate_cross_passes = None
@@ -141,10 +203,19 @@ class Player(object):
         self.inaccurate_corner_passes = None
         self.accurate_freekicks = None
         self.inaccurate_freekicks = None
+        self.accurate_cross_passes_per_90 = None
+        self.inaccurate_cross_passes_per_90 = None
+        self.accurate_corner_passes_per_90 = None
+        self.inaccurate_corner_passes_per_90 = None
+        self.accurate_freekicks_per_90 = None
+        self.inaccurate_freekicks_per_90 = None
 
         self.total_key_pass = None
         self.long_key_pass = None
         self.short_key_pass = None
+        self.total_key_pass_per_90 = None
+        self.long_key_pass_per_90 = None
+        self.short_key_pass_per_90 = None
 
         self.key_pass_cross = None
         self.key_pass_corner = None
@@ -152,6 +223,12 @@ class Player(object):
         self.key_pass_freekick = None
         self.key_pass_throwin = None
         self.key_passes_others = None
+        self.key_pass_cross_per_90 = None
+        self.key_pass_corner_per_90 = None
+        self.key_pass_throughball_per_90 = None
+        self.key_pass_freekick_per_90 = None
+        self.key_pass_throwin_per_90 = None
+        self.key_passes_others_per_90 = None
 
         self.cross_assist = None
         self.corner_assist = None
@@ -159,8 +236,15 @@ class Player(object):
         self.freeckick_assist = None
         self.throw_in_assist = None
         self.other_assist = None
+        self.cross_assist_per_90 = None
+        self.corner_assist_per_90 = None
+        self.throughball_assist_per_90 = None
+        self.freeckick_assist_per_90 = None
+        self.throw_in_assist_per_90 = None
+        self.other_assist_per_90 = None
 
         self.total_assist_per_game = None
+        self.total_assist_per_game_per_90 = None
 
     def __str__(self):
         return "Name: " + str(self.name) + "\n" + "Position: " + str(self.position) + "\n" + "Birth: " \
