@@ -55,6 +55,18 @@ if __name__ == "__main__":
                                                                    constants_whoscored.LEAGUES_LINK[constants_whoscored.LEAGUE_INDEX],
                                                                                      constants_whoscored.SEASON_NUMBER[
                                                                                          constants_whoscored.SEASON_INDEX])
+    elif constants_whoscored.LEAGUE_INDEX in [6, 11] and constants_whoscored.SEASON_INDEX < 8:
+        site = '{}/Regions/{}/Tournaments/{}/Seasons/{}/Stages/{}/Show/{}-{}-{}'.format(constants_whoscored.WHOSCORED_URL,
+                                                                  constants_whoscored.LEAGUES_ID[constants_whoscored.LEAGUE_INDEX],
+                                                                constants_whoscored.LEAGUES_NUM[constants_whoscored.LEAGUE_INDEX],
+                                                                   constants_whoscored.SEASON_ID[constants_whoscored.LEAGUE_INDEX][constants_whoscored.SEASON_INDEX],
+                                                                     constants_whoscored.PLAYOFF_ID[constants_whoscored.LEAGUE_INDEX][constants_whoscored.SEASON_INDEX],
+                                                                   constants_whoscored.LEAGUES_LINK[constants_whoscored.LEAGUE_INDEX],
+                                                                                     constants_whoscored.SEASON_NUMBER[
+                                                                                         constants_whoscored.SEASON_INDEX],
+                                                                                        constants_whoscored.SEASON_NUMBER[
+                                                                                            constants_whoscored.SEASON_INDEX+1]
+                                                                                        )
     else:
         site = '{}/Regions/{}/Tournaments/{}/Seasons/{}/{}'.format(constants_whoscored.WHOSCORED_URL,
                                                                   constants_whoscored.LEAGUES_ID[constants_whoscored.LEAGUE_INDEX],
@@ -80,6 +92,7 @@ if __name__ == "__main__":
     print(teams)
     for idx, team in enumerate(teams[constants_whoscored.TEAM_INDEX:]):
         print('Progress: ' + str(constants_whoscored.TEAM_INDEX + idx) + ' / ' + str(len(teams)-1))
+        print("League Number: " + constants_whoscored.LEAGUE_INDEX)
         url = team.find('a', {'class': 'team-link'}).get('href')
         team_name = team.find('a', {'class': 'team-link'}).text
         if constants_whoscored.SEASON_NUMBER[constants_whoscored.SEASON_INDEX] == constants_whoscored.SEASON_NUMBER[len(constants_whoscored.SEASON_NUMBER)-1]:
@@ -276,7 +289,6 @@ if __name__ == "__main__":
                             actions.click(restart_team)
                             actions.perform()
                             time.sleep(2)
-                            actions.perform()
                             offensive_button = browser.find_elements_by_class_name('in-squad-detailed-view')[1]
                             actions = ActionChains(browser)
                             actions.move_to_element(offensive_button)
@@ -1114,6 +1126,7 @@ if __name__ == "__main__":
                         Select(browser.find_element_by_id('stageId')).select_by_visible_text(not_new_seasons[0])
                         time.sleep(5)
                         Select(browser.find_element_by_id('stageId')).select_by_visible_text(competition)
+                        time.sleep(5)
                         page = browser.page_source
                         soup = BeautifulSoup(page, "html.parser")
                         player_list = soup.find('tbody', {'id': 'player-table-statistics-body'}).find_all('tr')
@@ -1184,6 +1197,9 @@ if __name__ == "__main__":
                         Select(browser.find_element_by_id('stageId')).select_by_visible_text(not_new_seasons[0])
                         time.sleep(5)
                         Select(browser.find_element_by_id('stageId')).select_by_visible_text(competition)
+                        time.sleep(5)
+                        player_list_defensive = browser.find_elements_by_id("player-table-statistics-body")[
+                            1].find_elements_by_tag_name('tr')
                     except:
                         print("CRASH")
                         restart_team = browser.find_element_by_class_name(
