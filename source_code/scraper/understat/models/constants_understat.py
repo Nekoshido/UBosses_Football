@@ -8,7 +8,7 @@ LEAGUES = ['EPL', 'La_liga', 'Bundesliga', 'Serie_A', 'Ligue_1', 'RFPL']
 
 # league_num is the league
 TEAM_INDEX = 0
-LEAGUE_NUM = 0
+LEAGUE_NUM = 5
 YEARS_INDEX = 4
 LEAGUE_TEXT = LEAGUES[LEAGUE_NUM]
 YEAR_TEXT = YEARS[YEARS_INDEX]

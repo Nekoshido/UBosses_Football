@@ -26,7 +26,7 @@ class Player(object):
         self.yellow_cards = None
         self.red_cards = None
         self.shots_per_game = None
-        self.pass_success_percentage = None
+        self.pass_success_percentage_per_game = None
         self.aerials_duels_won_per_game = None
         self.man_of_the_match = None
         self.rating = None
