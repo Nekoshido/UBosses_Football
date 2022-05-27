@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-import constants
+
+import source_code.tools.constants as constants
 
 
 def _invert(x, limits):
@@ -92,90 +91,85 @@ class ComplexRadar():
         self.ax.fill(self.angle, np.r_[sdata, sdata[0]], *args, **kw)
 
 
-# df = pd.DataFrame({
-#     "Spe": pd.Series([89, 83]),
-#     "Str": pd.Series([69, 53]),
-#     "Det": pd.Series([82, 44]),
-#     "Extr": pd.Series([59, 74]),
-#     "Int": pd.Series([63, 11]),
-#     "Est": pd.Series([12, 69]),
-#     "Ape": pd.Series([29, 13]),
-# })
-
-# df_midfield = pd.DataFrame({
-#     "Long Balls": pd.Series([3.341067285]), #6
-#     "% Passing": pd.Series([94.45114596]), #1
-#     "Chances created": pd.Series([0.835266821]) ,#2
-#     "Through ball": pd.Series([0.104408353]), #11
-#     "Scoring contribution": pd.Series([0.104408353]),#7
-#     "Successful Dribbles": pd.Series([0.522041763]), #8
-#     "Dispossessed": pd.Series([0.939675174]), #3
-#     "Fouls": pd.Series([0.835266821]), #4
-#     "Tackles accuracy": pd.Series([63.63636364]), #10
-#     "Tackles": pd.Series([0.730858469]), #9
-#     "Interceptions": pd.Series([0.522041763]) #5
-# })
-#
-# variables = [k[0] for k in df_midfield.iteritems()]
-# ranges_midfield = [
-#                 (66.486266, 88.591800),  # 1
-#                 (0.248980, 2.471769),  # 2
-#                 (2.742811, 0.257904),  # 3
-#                 (2.547170, 0.522244),  # 4
-#                 (0.219794, 2.307600),  # 5
-#                 (0.333333, 5.039712),  # 6
-#                 (0.0, 0.670211),  # 7
-#                 (0.137625, 2.745110),  # 8
-#                 (0.629371, 3.308796),  # 9
-#                 (42.857143, 83.333333),  # 10
-#                 (0.0, 0.180171),  # 11
-#                 ]
-#
-#
-# ranges = ranges_midfield
 fig1 = plt.figure(figsize=(8, 8))
 
 variables_midfield = ("Scoring contribution", "Through ball", "Chances created",
-             "% Passing", "Long Balls", "Interceptions",
-             "Tackles", "Tackles accuracy", "Fouls",
-             "Dispossessed", "Successful Dribbles")
+                      "% Passing", "Long Balls", "Interceptions",
+                      "Tackles", "Tackles accuracy", "Fouls",
+                      "Dispossessed", "Successful Dribbles")
 
 variables_forward = ("% Passing", "% Shooting", "Shots",
-                 "Non-Penalty Goals", "% Goal Conversion", "Successful Dribbles",
-                 "Dispossessed", "Int+Tackles", "Throughballs",
-                 "Key Passes", "Assists")
+                     "Non-Penalty Goals", "% Goal Conversion", "Successful Dribbles",
+                     "Dispossessed", "Int+Tackles", "Throughballs",
+                     "Key Passes", "Assists")
+
+variables_fullback = ("Passing %", "Interceptions", "Tackles %",
+                      "Tackles", "Fouls", "Dribbled Past", "Aerial Wins",
+                      "Dispossessed", "Successful Dribbles",
+                      "Crossing %", "Comp. Crosses", "Key Passes")
+
+variables_centerback = ("Interceptions", "Tackles", "Tackles %",
+                        "Dribbled Past", "Passing %", "Long Balls",
+                        "Long Balls %", "Aerial Wins", "Aerial Wins %",
+                        "Fouls", "Clearances", "Total Block")
 
 ranges_forward = [(60.249548, 84.768278), (0.458333, 0.757576), (1.079975, 3.823562),
- (0.093976, 0.458415), (0.065471, 0.150828), (0.227998, 2.968950),
- (3.013611, 0.813238), (0.494256, 3.413170), (0.000000, 0.182096),
- (0.564970, 2.543016), (0.000000, 0.350861)]
+                  (0.093976, 0.458415), (0.065471, 0.150828), (0.227998, 2.968950),
+                  (3.013611, 0.813238), (0.494256, 3.413170), (0.000000, 0.182096),
+                  (0.564970, 2.543016), (0.000000, 0.350861)]
 
 ranges_midfield = [(0.0, 0.664351), (0.0, 0.195313), (0.193237, 2.578699),
-          (68.782996, 89.389483), (0.507248, 5.478869), (0.276554, 2.386976),
-          (0.696775, 3.401383), (43.750000, 81.915052), (2.614228, 0.555767),
-          (2.633632, 0.231204), (0.116280, 2.694309)]
+                   (68.782996, 89.389483), (0.507248, 5.478869), (0.276554, 2.386976),
+                   (0.696775, 3.401383), (43.750000, 81.915052), (2.614228, 0.555767),
+                   (2.633632, 0.231204), (0.116280, 2.694309)]
 
-ranges = ranges_forward
-variables = variables_forward
+ranges_fullback = [(65.312280, 87.936531), (0.785714, 3.327623), (56.944444, 87.500000),
+                   (1.029225, 3.569316), (2.142857, 0.490597), (1.592686, 0.256847),
+                   (0.383564, 3.195443), (1.638058, 0.103093), (0.073171, 1.708861),
+                   (0.000000, 37.500000), (0.000000, 1.555058), (0.123144, 1.696841)]
+
+ranges_centerback = [(0.614300, 3.528430), (1.056413, 3.152353), (50.394737, 98.846154),
+                     (1.769866, 0.023038), (56.367473, 84.551554), (0.819657, 4.292086),
+                     (23.160839, 56.932084), (0.572950, 3.434169), (32.321429, 66.666667),
+                     (2.021546, 0.503185), (1.130538, 5.267605), (0.749127, 2.525655)]
+#
+# ranges = ranges_forward
+# variables = variables_forward
 
 # ranges = ranges_midfield
 # variables = variables_midfield
 
+# ranges = ranges_fullback
+# variables = variables_fullback
+
+ranges = ranges_centerback
+variables = variables_centerback
+
 radar = ComplexRadar(fig1, variables, ranges)
 lax = []
 
-index = ["Xavi 2011"]
+index = ["Scott McTominay"]
 
-datas = [(
-    75.63025210084034, 0.6875, 1.49843912591051, 0.12017044826007156, 0.08019708387356163, 2.9500520291363164,
-    2.8563995837669096, 2.575442247658689, 0.18730489073881373, 1.7793964620187306, 0.09365244536940688
-          )]
+colors = [
+    (
+        constants.NAPOLI_PLOT,
+        constants.NAPOLI_FILL
+    )
+]
 
-for i, name in enumerate(index):
+datas = [
+    (
+        1.119974473516273, 1.751754945756222, 78.2051282051282, 0.4881940012763242, 88.66799204771371,
+        4.479897894065092, 57.35294117647059, 2.1825143586470963, 55.47445255474452, 1.4071474154435226,
+        3.8768347160178687, 1.8379068283343971
+
+    )]
+
+for i, name in enumerate( index):
     # data = df_midfield.iloc[i].values
     data = datas[i]
-    color_plot = constants.MADRID_PLOT
-    color_fill = constants.MADRID_FILL
+    color_plot = colors[i][0]
+    color_fill = colors[i][1]
     l, = radar.plot(data, label=name, color=color_plot)
     lax.append(l)
     radar.fill(data, alpha=0.2, color=color_fill)

@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import numpy as np
 from pandas.io.json import json_normalize  # package for flattening json in pandas df
 import glob, os
 
@@ -9,14 +10,16 @@ path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whos
 
 dataframe = None
 first = True
-path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/data/archive2'
+# path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/data/archive2'
 coef_total_xG = 7971.108875359432 / 82665.99898016188
 coef_inside_yard_box_xG = 1758.502254655629 / 5674.666768052864
 coef_inside_penalty_area_xG = 5659.5889985826325 / 42973.62233200068
 coef_outside_penalty_area_xG = 1147.9944651285803 / 33031.919089974275
 
 
-def read_json(path):
+def read_json(path)-> pd.DataFrame:
+    first = True
+    dataframe = None
     for root, dirs, files in os.walk(path):
         for file in files:
             print(file)
@@ -39,12 +42,15 @@ def read_csv(path):
 
 
 def save_df_csv(dataframe, path):
-    dataframe.to_csv(path, sep=',', encoding='latin1', index=False)
+    #encoding='latin1'
+    dataframe.to_csv(path, sep=',', encoding='utf-8', index=False)
 
 
-def make_midfield(dataframe, name=None):
+def find_top_midfield_player(dataframe, name=None):
     if name:
         dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
+    dataframe = dataframe.loc[dataframe['minutes_played'] > 500.0]
+    dataframe = dataframe.loc[dataframe['season'] > 2018]
     df_midfield = dataframe.loc[dataframe['position'].str.contains("DMC|Midfielder|M\(C")]
     df_midfield["custom_passing"] = ((df_midfield["accurate_long_balls"] + df_midfield["accurate_short_passes"]) / (
             df_midfield["accurate_long_balls"] + df_midfield["accurate_short_passes"] + df_midfield[
@@ -77,62 +83,206 @@ def make_midfield(dataframe, name=None):
                  "Dispossessed", "Successful Dribbles")
 
     tag_columns = ["name", "team", "season", "competition", "minutes_played"]
+
+    # print(df_fullback.columns.values)
+    # min_max_scaler = preprocessing.MinMaxScaler()
+    # scaled_array = min_max_scaler.fit_transform(df_fullback[important_columns])
+    # df_normalized = pd.DataFrame(scaled_array)
+    df_quantile_01 = df_midfield[important_columns].quantile(.01)
+    df_quantile_99 = df_midfield[important_columns].quantile(.99)
+    df_midfield[important_columns] = np.where(df_midfield[important_columns] > df_quantile_99[important_columns],
+                                              df_quantile_99[important_columns], df_midfield[important_columns])
+    df_midfield[important_columns] = np.where(df_midfield[important_columns] < df_quantile_01[important_columns],
+                                              df_quantile_01[important_columns], df_midfield[important_columns])
+
+    df_midfield[important_columns] = (df_midfield[important_columns] - df_quantile_01[important_columns]) / (
+            df_quantile_99[important_columns] - df_quantile_01[important_columns])
+
+    df_midfield.loc[:, 'level'] = df_midfield.loc[:, important_columns[0]].add(
+        df_midfield.loc[:, important_columns[1]]).add(df_midfield.loc[:, important_columns[2]]).add(
+        df_midfield.loc[:, important_columns[3]]).add(df_midfield.loc[:, important_columns[4]]).add(
+        df_midfield.loc[:, important_columns[5]]).add(df_midfield.loc[:, important_columns[6]]).add(
+        df_midfield.loc[:, important_columns[7]]).add(df_midfield.loc[:, important_columns[8]]).add(
+        df_midfield.loc[:, important_columns[9]]).add(df_midfield.loc[:, important_columns[10]])
+
+    df_midfield_return = df_midfield[tag_columns + important_columns + ['level']]
+
+    return df_midfield_return.sort_values(by='level', ascending=False)
+
+
+def make_midfield(dataframe, name=None):
+    if name:
+        dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
+    df_midfield = dataframe.loc[dataframe['minutes_played'] > 300.0]
+    df_midfield = df_midfield.loc[dataframe['position'].str.contains("DMC|Midfielder|M\(")]
+    df_midfield["custom_passing"] = ((df_midfield["accurate_long_balls"] + df_midfield["accurate_short_passes"]) / (
+            df_midfield["accurate_long_balls"] + df_midfield["accurate_short_passes"] + df_midfield[
+        "inaccurate_long_balls"] + df_midfield["inaccurate_short_passes"])) * 100
+    df_midfield["tt_goal_wP_per_90"] = ((df_midfield["goals"] - df_midfield["goal_penaltyscored"]) / df_midfield[
+        "minutes_played"]) * 90.0
+    df_midfield["scoring_contribution"] = df_midfield["tt_goal_wP_per_90"] + df_midfield["total_assist_per_game_per_90"]
+    df_midfield["fouls_per90"] = (df_midfield["fouls"] / df_midfield["minutes_played"]) * 90.0
+    df_midfield["tackles_accuracy"] = (df_midfield["total_tackles_won"] / df_midfield["total_tackle_attempts"]) * 100
+    df_midfield["interceptions_per90"] = (df_midfield["interceptions"] / df_midfield["minutes_played"]) * 90.0
+    important_columns = ["scoring_contribution", "key_pass_throughball_per_90", "total_key_pass_per_90",
+                         "custom_passing", "accurate_long_balls_per_90", "interceptions_per90",
+                         "total_tackles_won_per90", "tackles_accuracy", "fouls_per90",
+                         "total_dispossessed_per_90", "successful_dribbles_per90"]
+
+    variables = ("Scoring contribution", "Through ball", "Chances created",
+                 "% Passing", "Long Balls", "Interceptions",
+                 "Tackles", "Tackles accuracy", "Fouls",
+                 "Dispossessed", "Successful Dribbles")
+
+    tag_columns = ["name", "team", "season", "competition", "minutes_played"]
     df_midfield_return = df_midfield[tag_columns + important_columns]
     df_quantile_05 = df_midfield[important_columns].quantile(.05)
     df_quantile_95 = df_midfield[important_columns].quantile(.95)
     return df_midfield_return, df_quantile_05, df_quantile_95
 
 
+def make_centerback(dataframe, name=None):
+    if name:
+        dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
+    df_centerback = dataframe.loc[dataframe['minutes_played'] > 300.0]
+    df_centerback = df_centerback.loc[dataframe['position'].str.contains("D\(C|Defender")]
+    df_centerback["interceptions_per90"] = (df_centerback["interceptions"] / df_centerback["minutes_played"]) * 90.0
+
+    df_centerback["total_tackles_won_per90"] = (df_centerback["total_tackles_won"] / df_centerback[
+        "minutes_played"]) * 90.0
+
+    df_centerback["tackles_accuracy"] = (df_centerback["total_tackles_won"] / df_centerback[
+        "total_tackle_attempts"]) * 100
+
+    df_centerback = df_centerback.assign(
+        passing_percentage=(((df_centerback["accurate_long_balls"] + df_centerback["accurate_short_passes"]) / (
+                df_centerback["accurate_long_balls"] + df_centerback["accurate_short_passes"] + df_centerback[
+            "inaccurate_long_balls"] + df_centerback["inaccurate_short_passes"])) * 100))
+
+    df_centerback["accurate_long_balls_per_90"] = (df_centerback["accurate_long_balls"] / df_centerback[
+        "minutes_played"]) * 90.0
+
+    df_centerback["long_balls_accuracy"] = (df_centerback["accurate_long_balls"] / (
+            df_centerback["accurate_long_balls"] + df_centerback["inaccurate_long_balls"])) * 100
+
+    df_centerback["total_aerials_duels_won_per90"] = (df_centerback["total_aerials_duels_won"] / df_centerback[
+        "minutes_played"]) * 90.0
+
+    df_centerback["aerials_duels_won_accuracy"] = (df_centerback["total_aerials_duels_won"] / (
+        df_centerback["total_aerial_duels"])) * 100
+
+    df_centerback["fouls_per90"] = (df_centerback["fouls"] / df_centerback["minutes_played"]) * 90.0
+
+    df_centerback["clearances_per90"] = (df_centerback["total_clearances"] / df_centerback["minutes_played"]) * 90.0
+
+    df_centerback["total_block_per90"] = ((df_centerback["blocked_shots"] + df_centerback["blocked_crosses"] +
+                                           df_centerback["blocked_passes"]) / df_centerback["minutes_played"]) * 90.0
+
+    important_columns = ["interceptions_per90", "total_tackles_won_per90", "tackles_accuracy",
+                         "player_gets_dribbled_per90", "passing_percentage", "accurate_long_balls_per_90",
+                         "long_balls_accuracy", "total_aerials_duels_won_per90", "aerials_duels_won_accuracy",
+                         "fouls_per90", "clearances_per90", "total_block_per90"]
+
+    tag_columns = ["name", "team", "season", "competition", "minutes_played"]
+    df_centerback_return = df_centerback[tag_columns + important_columns]
+    df_quantile_05 = df_centerback[important_columns].quantile(.05)
+    df_quantile_95 = df_centerback[important_columns].quantile(.95)
+    return df_centerback_return, df_quantile_05, df_quantile_95
+
+
 def make_fullback(dataframe, name=None):
     if name:
         dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
-    dataframe = dataframe.loc[dataframe['minutes_played'] > 300.0]
+    dataframe = dataframe.loc[dataframe['minutes_played'] > 500.0]
     df_fullback = dataframe.loc[dataframe['position'].str.contains("D\(L|D\(R|D\(CR|D\(CR|D\(CL")]
     df_fullback = df_fullback.assign(
         passing_percentage=(((df_fullback["accurate_long_balls"] + df_fullback["accurate_short_passes"]) / (
                 df_fullback["accurate_long_balls"] + df_fullback["accurate_short_passes"] + df_fullback[
             "inaccurate_long_balls"] + df_fullback["inaccurate_short_passes"])) * 100))
-
-    # df_fullback = df_fullback.assign(crossing_percentage=((df_fullback["accurate_cross_passes"] / df_fullback[
-    #     "inaccurate_cross_passes"]) * 100.0))
-
-    df_fullback.loc[df_fullback.inaccurate_cross_passes != 0, 'crossing_percentage'] = ((df_fullback["accurate_cross_passes"] / (df_fullback[
-        "inaccurate_cross_passes"] + df_fullback["accurate_cross_passes"])) * 100.0)
+    df_fullback.loc[df_fullback.inaccurate_cross_passes != 0, 'crossing_percentage'] = (
+            (df_fullback["accurate_cross_passes"] / (df_fullback[
+                                                         "inaccurate_cross_passes"] + df_fullback[
+                                                         "accurate_cross_passes"])) * 100.0)
 
     df_fullback.loc[df_fullback.inaccurate_cross_passes == 0, 'crossing_percentage'] = 0.0
 
-    # df_fullback = df_fullback.assign(crossing_percentage=((df_fullback["accurate_cross_passes"] / df_fullback[
-    #     "minutes_played"]) * 90.0))
-
     df_fullback = df_fullback.assign(fouls_per90=((df_fullback["fouls"] / df_fullback["minutes_played"]) * 90.0))
-    # Tackles/was dribbled * 100 = total_tackles_won_per90/player_gets_dribbled_per90 * 100
-    # df_fullback = df_fullback.assign(tackles_accuracy=((df_fullback["total_tackles_won"] / df_fullback["total_tackle_attempts"]) * 100))
 
-    df_fullback.loc[df_fullback.total_tackle_attempts != 0, 'tackles_accuracy'] = ((df_fullback["total_tackles_won"] / df_fullback["total_tackle_attempts"]) * 100)
+    df_fullback.loc[df_fullback.total_tackle_attempts != 0, 'tackles_accuracy'] = (
+            (df_fullback["total_tackles_won"] / df_fullback["total_tackle_attempts"]) * 100)
 
     df_fullback.loc[df_fullback.total_tackle_attempts == 0, 'tackles_accuracy'] = 0.0
 
-    df_fullback = df_fullback.assign(interceptions_per90=(df_fullback["interceptions"] / df_fullback["minutes_played"]) * 90.0)
-    important_columns = ["total_tackles_won_per90", "tackles_accuracy", "interceptions_per90",
-                         "passing_percentage", "total_key_pass_per_90", "accurate_cross_passes_per_90",
-                         "crossing_percentage", "successful_dribbles_per90", "total_dispossessed_per_90",
-                         "total_aerials_duels_won_per_90", "player_gets_dribbled_per90", "fouls_per90", ]
+    df_fullback = df_fullback.assign(
+        interceptions_per90=(df_fullback["interceptions"] / df_fullback["minutes_played"]) * 90.0)
+
+    important_columns = ["passing_percentage", "interceptions_per90", "tackles_accuracy", "total_tackles_won_per90",
+                         "fouls_per90", "player_gets_dribbled_per90", "total_aerials_duels_won_per_90",
+                         "total_dispossessed_per_90",
+                         "successful_dribbles_per90", "crossing_percentage", "accurate_cross_passes_per_90",
+                         "total_key_pass_per_90",
+                         ]
 
     tag_columns = ["name", "team", "season", "competition", "minutes_played"]
-    # print(df_fullback.columns.values)
-    # min_max_scaler = preprocessing.MinMaxScaler()
-    # scaled_array = min_max_scaler.fit_transform(df_fullback[important_columns])
-    # df_normalized = pd.DataFrame(scaled_array)
-    df_quantile_01 = df_fullback[important_columns].quantile(.01)
-    df_quantile_99 = df_fullback[important_columns].quantile(.99)
-    df_fullback[important_columns] = (df_fullback[important_columns] - df_quantile_01[important_columns]) / (df_quantile_99[important_columns] - df_quantile_01[important_columns])
     df_fullback_return = df_fullback[tag_columns + important_columns]
-    return df_fullback_return
-
-
     df_quantile_05 = df_fullback[important_columns].quantile(.05)
     df_quantile_95 = df_fullback[important_columns].quantile(.95)
     return df_fullback_return, df_quantile_05, df_quantile_95
+
+
+def find_top_forward_player(dataframe, name=None):
+    if name:
+        dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
+    dataframe = dataframe.loc[dataframe['minutes_played'] > 500.0]
+    dataframe = dataframe.loc[dataframe['season'] > 2018]
+    df_forward = dataframe.loc[dataframe['position'].str.contains("AM|FW")]
+    df_forward["custom_passing"] = ((df_forward["accurate_long_balls"] + df_forward["accurate_short_passes"]) / (
+            df_forward["accurate_long_balls"] + df_forward["accurate_short_passes"] + df_forward[
+        "inaccurate_long_balls"] +
+            df_forward["inaccurate_short_passes"])) * 100
+    df_forward["shot_percentage"] = (df_forward["total_shots"] - df_forward["shot_offtarget"]) / df_forward[
+        "total_shots"]
+    df_forward["xG"] = (df_forward["shots_from_inside_thesix_yard_box"] * coef_inside_yard_box_xG) + (
+            df_forward["shots_from_inside_the_penalty_area"] * coef_inside_penalty_area_xG) + (
+                               df_forward["shots_from_outside_the_penalty_area"] * coef_outside_penalty_area_xG)
+    df_forward["xG_per90"] = (df_forward["xG"] / df_forward["minutes_played"]) * 90.0
+    df_forward["goal_conversion"] = df_forward["xG_per90"] / df_forward["total_shots_per90"]
+    df_forward["interceptions_per90"] = (df_forward["interceptions"] / df_forward["minutes_played"]) * 90.0
+    df_forward["total_tackles_won_per90"] = (df_forward["total_tackles_won"] / df_forward["minutes_played"]) * 90.0
+    df_forward["tackles_interceptions_per90"] = df_forward["interceptions_per90"] + df_forward[
+        "total_tackles_won_per90"]
+
+    variables = ("% Passing", "% Shooting", "Shots",
+                 "Non-Penalty Goals", "% Goal Conversion", "Successful Dribbles",
+                 "Dispossessed", "Int+Tackles", "Throughballs",
+                 "Key Passes", "Assists")
+
+    important_columns = ["custom_passing", "shot_percentage", "total_shots_per90",
+                         "xG_per90", "goal_conversion", "successful_dribbles_per90",
+                         "total_dispossessed_per_90", "tackles_interceptions_per90", "key_pass_throughball_per_90",
+                         "total_key_pass_per_90", "total_assist_per_game_per_90"]
+
+    tag_columns = ["name", "team", "season", "competition", "minutes_played"]
+    df_quantile_01 = df_forward[important_columns].quantile(.01)
+    df_quantile_99 = df_forward[important_columns].quantile(.99)
+    df_forward[important_columns] = np.where(df_forward[important_columns] > df_quantile_99[important_columns],
+                                             df_quantile_99[important_columns], df_forward[important_columns])
+    df_forward[important_columns] = np.where(df_forward[important_columns] < df_quantile_01[important_columns],
+                                             df_quantile_01[important_columns], df_forward[important_columns])
+
+    df_forward[important_columns] = (df_forward[important_columns] - df_quantile_01[important_columns]) / (
+            df_quantile_99[important_columns] - df_quantile_01[important_columns])
+
+    df_forward.loc[:, 'level'] = df_forward.loc[:, important_columns[0]].add(
+        df_forward.loc[:, important_columns[1]]).add(df_forward.loc[:, important_columns[2]]).add(
+        df_forward.loc[:, important_columns[3]]).add(df_forward.loc[:, important_columns[4]]).add(
+        df_forward.loc[:, important_columns[5]]).add(df_forward.loc[:, important_columns[6]]).add(
+        df_forward.loc[:, important_columns[7]]).add(df_forward.loc[:, important_columns[8]]).add(
+        df_forward.loc[:, important_columns[9]]).add(df_forward.loc[:, important_columns[10]])
+
+    df_forward_return = df_forward[tag_columns + important_columns + ['level']]
+
+    return df_forward_return.sort_values(by='level', ascending=False)
 
 
 #
@@ -175,9 +325,11 @@ def make_fullback(dataframe, name=None):
 def make_forward(dataframe, name=None):
     if name:
         dataframe = dataframe.loc[dataframe['name'].str.contains(name)]
-    # dataframe = dataframe.loc[dataframe['minutes_played'] > 1000.0]
+    # df_forward = dataframe.groupby(['name', 'team', 'season', 'birth', 'height', 'weight', 'id'],
+    #                                as_index=False).sum()
+    df_forward = dataframe.loc[dataframe['minutes_played'] > 300.0]
     # dataframe = dataframe.loc[dataframe['season'] > 2016]
-    df_forward = dataframe.loc[dataframe['position'].str.contains("AM|FW")]
+    # df_forward = dataframe.loc[dataframe['position'].str.contains("AM|FW|Forward")]
     # "% Passing"\
     df_forward["custom_passing"] = ((df_forward["accurate_long_balls"] + df_forward["accurate_short_passes"]) / (
             df_forward["accurate_long_balls"] + df_forward["accurate_short_passes"] + df_forward[
@@ -221,12 +373,6 @@ def make_forward(dataframe, name=None):
     df_quantile_95 = df_forward[important_columns].quantile(.95)
     return df_forward_return, df_quantile_05, df_quantile_95
 
-
-file_name = 'final_s2019.csv'
-path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/data/'
-dataframe = pd.read_csv(path + file_name, encoding='latin-1')
-
-values_list = list(dataframe.columns.values)
 
 float_list = ['accurate_corner_passes', 'accurate_corner_passes_per_90', 'accurate_cross_passes',
               'accurate_cross_passes_per_90', 'accurate_freekicks', 'accurate_freekicks_per_90', 'accurate_long_balls',
@@ -279,23 +425,36 @@ float_list = ['accurate_corner_passes', 'accurate_corner_passes_per_90', 'accura
               'total_yellow_cards_per90', 'unsuccessful_dribbles', 'unsuccessful_dribbles_per90',
               'unsuccessful_touches', 'unsuccessful_touches_per90', 'weight', 'yellow_cards']
 
-#
-#
-dataframe[float_list] = dataframe[float_list].replace(['-'], '0')
-dataframe[float_list] = dataframe[float_list].astype(float)
+file_name = 'final2022.csv'
+path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/files/'
+dataframe = pd.read_csv(path + file_name, encoding='utf-8')
 
-name = "Correa"
-df_player, df_quantile_05, df_quantile_95 = make_forward(dataframe, name)
-#df_player, df_quantile_05, df_quantile_95 = make_midfield(dataframe, name)
+# values_list = list(dataframe.columns.values)
+#
+# dataframe[float_list] = dataframe[float_list].replace(['-'], '0')
+# dataframe[float_list] = dataframe[float_list].astype(float)
+#
+name = 'Araújo'
+# df_player, df_quantile_05, df_quantile_95 = make_forward(dataframe, name)
+# df_player, df_quantile_05, df_quantile_95 = make_midfield(dataframe, name)
 # df_player, df_quantile_05, df_quantile_95 = make_fullback(dataframe, name)
+df_player, df_quantile_05, df_quantile_95 = make_centerback(dataframe, name)
+
+# df_player = find_top_midfield_player(dataframe)
+# df_player = find_top_forward_player(dataframe)
 
 # print("Quantile 5% Worst")
 # print(df_quantile_05)
 # print("Quantile 5% Best")
 # print(df_quantile_95)
 
-print(df_player)
+# print(df_player)s
 
+
+#
 df_player.to_csv(
-    'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/data/players/' + name + '.csv',
+    'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/files/players/' + name + '.csv',
     sep=',', index=False)
+# path = 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/data/'
+# df = read_json(path)
+# save_df_csv(df, 'C:/Users/Hecto/PycharmProjects/UBosses_Football/source_code/scraper/whoscored_scraper/files/final2022.csv')
