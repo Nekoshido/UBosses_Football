@@ -133,8 +133,8 @@ ranges_centerback = [(0.614300, 3.528430), (1.056413, 3.152353), (50.394737, 98.
                      (23.160839, 56.932084), (0.572950, 3.434169), (32.321429, 66.666667),
                      (2.021546, 0.503185), (1.130538, 5.267605), (0.749127, 2.525655)]
 #
-# ranges = ranges_forward
-# variables = variables_forward
+ranges = ranges_forward
+variables = variables_forward
 
 # ranges = ranges_midfield
 # variables = variables_midfield
@@ -142,8 +142,8 @@ ranges_centerback = [(0.614300, 3.528430), (1.056413, 3.152353), (50.394737, 98.
 # ranges = ranges_fullback
 # variables = variables_fullback
 
-ranges = ranges_centerback
-variables = variables_centerback
+# ranges = ranges_centerback
+# variables = variables_centerback
 
 radar = ComplexRadar(fig1, variables, ranges)
 lax = []
@@ -152,16 +152,15 @@ index = ["Scott McTominay"]
 
 colors = [
     (
-        constants.NAPOLI_PLOT,
-        constants.NAPOLI_FILL
+        constants.BARCELONA_PLOT,
+        constants.BARCELONA_FILL
     )
 ]
 
 datas = [
     (
-        1.119974473516273, 1.751754945756222, 78.2051282051282, 0.4881940012763242, 88.66799204771371,
-        4.479897894065092, 57.35294117647059, 2.1825143586470963, 55.47445255474452, 1.4071474154435226,
-        3.8768347160178687, 1.8379068283343971
+        76.64670658682635, 0.47619047619047616, 2.0, 0.32204628916382455, 0.16102314458191228, 0.7619047619047619,
+        1.1428571428571428, 1.0476190476190477, 0.0, 0.5714285714285714, 0.09523809523809523
 
     )]
 

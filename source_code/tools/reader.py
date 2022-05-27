@@ -434,11 +434,11 @@ dataframe = pd.read_csv(path + file_name, encoding='utf-8')
 # dataframe[float_list] = dataframe[float_list].replace(['-'], '0')
 # dataframe[float_list] = dataframe[float_list].astype(float)
 #
-name = 'Araújo'
-# df_player, df_quantile_05, df_quantile_95 = make_forward(dataframe, name)
+name = 'Malen'
+df_player, df_quantile_05, df_quantile_95 = make_forward(dataframe, name)
 # df_player, df_quantile_05, df_quantile_95 = make_midfield(dataframe, name)
 # df_player, df_quantile_05, df_quantile_95 = make_fullback(dataframe, name)
-df_player, df_quantile_05, df_quantile_95 = make_centerback(dataframe, name)
+# df_player, df_quantile_05, df_quantile_95 = make_centerback(dataframe, name)
 
 # df_player = find_top_midfield_player(dataframe)
 # df_player = find_top_forward_player(dataframe)
